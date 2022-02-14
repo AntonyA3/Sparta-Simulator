@@ -3,7 +3,7 @@
 *target
 *pom.xml
 *Sparta-Simulator.iml
-
+*.iml
 
 # Compiled class file
 *.class
