@@ -52,7 +52,6 @@ public class Main {
     public static int readInt() throws InputMismatchException {
         Scanner scanner = new Scanner(System.in);
         return scanner.nextInt();
->>>>>>> dev
     }
 
     public static String readString(){
