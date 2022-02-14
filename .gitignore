@@ -1,3 +1,10 @@
+# Ignore IntelliJ Stuff
+*.idea
+*target
+*pom.xml
+*Sparta-Simulator.iml
+
+
 # Compiled class file
 *.class
 
