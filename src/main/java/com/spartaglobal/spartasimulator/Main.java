@@ -16,8 +16,14 @@ public class Main {
                 System.out.println("Please Enter sim length in months\n\t<number>");
                 try {
                     months = Integer.valueOf(readInt());
+
                 } catch (InputMismatchException e) {
                     System.out.println("This is not a valid input");
+                }finally {
+                    if(months <= 0){
+                        months = null;
+                        System.out.println("You must enter a month that is greater than 0");
+                    }
                 }
             }
             Simulation simulation = new Simulation();
