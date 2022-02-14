@@ -12,7 +12,7 @@ public class DisplayManager {
     public enum Message{
         MONTHS("Please, enter the simulation length in months: "),
         INVALID_INPUT_MONTHS("Invalid input. " + MONTHS.message),
-        TOTAL_MONTHS("Run the System for " + "<numberOfMonths>" + " months."),
+//        TOTAL_MONTHS("Run the System for " + "<numberOfMonths>" + " months."),
         CENTRES_OPEN("Number of open centres open: "),
         FULL_CENTRES("Number of full centres: "),
         TRAINEES_TRAINING("Number of trainees currently training: "),
@@ -32,12 +32,13 @@ public class DisplayManager {
         return input;
     }
 
-    public static void printSystemInfo(TraineeDAO traineeDao){
-        System.out.println(Message.CENTRES_OPEN);
-        System.out.println(Message.FULL_CENTRES);
-        System.out.println(Message.TRAINEES_TRAINING);
-        System.out.println(Message.TRAINEES_WAITING);
-    }
+    // Thing to work on
+//    public static void printSystemInfo(TraineeDAO traineeDao){
+//        System.out.println(Message.CENTRES_OPEN);
+//        System.out.println(Message.FULL_CENTRES);
+//        System.out.println(Message.TRAINEES_TRAINING);
+//        System.out.println(Message.TRAINEES_WAITING);
+//    }
 
     public static void printException(Exception e){
         logger.error(e);
