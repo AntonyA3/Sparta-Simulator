@@ -20,6 +20,7 @@ public class Simulation {
         return 0;
     }
     public int getFullCentres(){
+
         return 0;
     }
     public int getTraineesTraining(){
