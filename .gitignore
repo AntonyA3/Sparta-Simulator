@@ -1,7 +1,6 @@
 # Ignore IntelliJ Stuff
 *.idea
 *target
-*pom.xml
 *Sparta-Simulator.iml
 *.iml
 
