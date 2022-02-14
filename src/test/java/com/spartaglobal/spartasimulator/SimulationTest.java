@@ -1,4 +1,4 @@
 package com.spartaglobal.spartasimulator;
 
-public class ProgramTest {
+public class SimulationTest {
 }
