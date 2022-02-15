@@ -18,8 +18,7 @@ public class DisplayManager {
         FULL_CENTRES("Number of full centres: %d"),
         TRAINEES_TRAINING("Number of trainees currently training: %d"),
         TRAINEES_WAITING("Number of trainees on the waiting list: %d"),
-        CONTINUE("Continue? 'Y' to continue, 'N' to stop"),
-        PRINT_DATA_CHOICE("Do you want to print the data each month (M) or after completing the simulation (S)?: "),
+        DATA_CHOICE("Do you want to print the data each month (M) or after completing the simulation (S)?: "),
         SIMULATION_COMPLETE("Simulation complete");
 
         public final String message;
@@ -42,10 +41,10 @@ public class DisplayManager {
                 // SELECT training_course, COUNT(*) FROM training_centres GROUP BY (training_course);
                 String.format(Message.FULL_CENTRES.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t == 0)) + "\n" +
                 // SELECT training_course, COUNT(*) FROM trainees_training_centres GROUP BY training_course;
-                String.format(Message.TRAINEES_TRAINING.message, traineeDao.getTrainingTraineesCount() + "\n" +
+                String.format(Message.TRAINEES_TRAINING.message, traineeDao.getTrainingTraineesCount() + "\n"
                 // SELECT training_course, COUNT(*) FROM trainees_training_centres GROUP BY training_course;
-                String.format(Message.TRAINEES_WAITING.message, traineeDao.getWaitingTrainees(false).length)
-        );
+//                String.format(Message.TRAINEES_WAITING.message, traineeDao.getWaitingTrainees(false).length)
+        ));
     }
 
     public static void printException(Exception e){

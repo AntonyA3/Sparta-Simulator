@@ -3,9 +3,7 @@ package com.spartaglobal.spartasimulator;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Properties;
+import java.util.*;
 
 public class TraineeDAO {
     private Connection connection = null;
