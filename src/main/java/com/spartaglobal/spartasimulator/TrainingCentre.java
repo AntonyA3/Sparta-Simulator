@@ -9,12 +9,8 @@ public abstract class TrainingCentre {
         this.trainingCentreCapacity = trainingCentreCapacity;
     }
 
-    public int getTrainingCentreID() {
-        return trainingCentreID;
-    }
+    public int getTrainingCentreID() { return trainingCentreID; }
 
-    public int getTrainingCentreCapacity() {
-        return trainingCentreCapacity;
-    }
+    public int getTrainingCentreCapacity() { return trainingCentreCapacity; }
 
 }
