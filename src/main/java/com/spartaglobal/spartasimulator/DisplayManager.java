@@ -18,6 +18,8 @@ public class DisplayManager {
         FULL_CENTRES("Number of full centres: %d"),
         TRAINEES_TRAINING("Number of trainees currently training: %d"),
         TRAINEES_WAITING("Number of trainees on the waiting list: %d"),
+        CONTINUE("Continue? 'Y' to continue, 'N' to stop"),
+        PRINT_DATA_CHOICE("Do you want to print the data each month (M) or after completing the simulation (S)?: "),
         SIMULATION_COMPLETE("Simulation complete");
 
         public final String message;
@@ -33,23 +35,25 @@ public class DisplayManager {
         return input;
     }
 
-    public static void printSystemInfo(TraineeDAO traineeDao){
-        // SELECT training_course, COUNT(*) FROM training_centres GROUP BY (training_course);
-        System.out.println(String.format(Message.CENTRES_OPEN.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t > 0)) + "\n" +
-            "MISSING CLOSED CENTRE\n" +
+    public static void printSystemInfo(TraineeDAO traineeDao, String printOption){
+        if (printOption.toLowerCase().equals('m')) {
             // SELECT training_course, COUNT(*) FROM training_centres GROUP BY (training_course);
-            String.format(Message.FULL_CENTRES.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t == 0)) + "\n" +
-            // SELECT training_course, COUNT(*) FROM trainees_training_centres GROUP BY training_course;
-            String.format(Message.TRAINEES_TRAINING.message, traineeDao.getTrainingTrainees().length) + "\n" +
-            // SELECT training_course, COUNT(*) FROM trainees_training_centres GROUP BY training_course;
-            String.format(Message.TRAINEES_WAITING.message, traineeDao.getWaitingTrainees(false).length)
-        );
-
-        System.out.println(String.format(String.format(Message.CENTRES_OPEN.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t > 0))) + "\n" +
-                String.format(Message.FULL_CENTRES.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t == 0)) + "\n" +
-                String.format(Message.TRAINEES_TRAINING.message, traineeDao.getTrainingTrainees().length) + "\n" +
-                String.format(Message.TRAINEES_WAITING.message, traineeDao.getWaitingTrainees(false).length)
-        );
+            System.out.println(String.format(Message.CENTRES_OPEN.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t > 0)) + "\n" +
+                    "MISSING CLOSED CENTRE\n" +
+                    // SELECT training_course, COUNT(*) FROM training_centres GROUP BY (training_course);
+                    String.format(Message.FULL_CENTRES.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t == 0)) + "\n" +
+                    // SELECT training_course, COUNT(*) FROM trainees_training_centres GROUP BY training_course;
+                    String.format(Message.TRAINEES_TRAINING.message, traineeDao.getTrainingTrainees().length) + "\n" +
+                    // SELECT training_course, COUNT(*) FROM trainees_training_centres GROUP BY training_course;
+                    String.format(Message.TRAINEES_WAITING.message, traineeDao.getWaitingTrainees(false).length)
+            );
+        } else if (printOption.toLowerCase().equals('s')) {
+            System.out.println(String.format(String.format(Message.CENTRES_OPEN.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t > 0))) + "\n" +
+                    String.format(Message.FULL_CENTRES.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t == 0)) + "\n" +
+                    String.format(Message.TRAINEES_TRAINING.message, traineeDao.getTrainingTrainees().length) + "\n" +
+                    String.format(Message.TRAINEES_WAITING.message, traineeDao.getWaitingTrainees(false).length)
+            );
+        }
     }
 
     public static void printException(Exception e){
