@@ -1,18 +1,16 @@
 package com.spartaglobal.spartasimulator;
 
-public class TrainingCentre {
+public abstract class TrainingCentre {
     private int trainingCentreID;
     private int trainingCentreCapacity;
-    public TrainingCentre(int traineeCentreID, int trainingCentreCapacity){
-        this.trainingCentreID = traineeCentreID;
+
+    public TrainingCentre(int trainingCentreID, int trainingCentreCapacity){
+        this.trainingCentreID = trainingCentreID;
         this.trainingCentreCapacity = trainingCentreCapacity;
     }
 
-    public int getTrainingCentreID() {
-        return trainingCentreID;
-    }
+    public int getTrainingCentreID() { return trainingCentreID; }
 
-    public int getTrainingCentreCapacity() {
-        return trainingCentreCapacity;
-    }
+    public int getTrainingCentreCapacity() { return trainingCentreCapacity; }
+
 }
