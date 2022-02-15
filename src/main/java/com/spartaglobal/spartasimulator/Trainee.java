@@ -6,10 +6,10 @@ public class Trainee {
     private Integer centreId;
     private String course;
 
-    public Trainee(int traineeID){
+    public Trainee(int traineeID) {
         this.traineeID = traineeID;
         this.centreId = null;
-
+    }
     public Trainee(int traineeID, String course) {
         this.traineeID = traineeID;
         this.course = course;
@@ -26,6 +26,10 @@ public class Trainee {
     public void setCentreId(Integer centreId) {
         this.centreId = centreId;
     }
-      
+
+    public void setCourse(String course) {
+        this.course = course;
+    }
+
     public String getTraineeCourse() { return course;}
 }

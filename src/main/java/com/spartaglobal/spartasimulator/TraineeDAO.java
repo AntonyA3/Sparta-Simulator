@@ -16,14 +16,16 @@ public class TraineeDAO {
         TraineeDAO tdao = new TraineeDAO();
         tdao.openConnection();
         tdao.createTables();
-        tdao.addTrainee(new Trainee(12));
-        tdao.addTrainee(new Trainee(23));
-        tdao.addTrainee(new Trainee(24));
-        tdao.addTrainee(new Trainee(25));
+        tdao.addTrainee(new Trainee(12, Course.JAVA.name));
+        tdao.addTrainee(new Trainee(23, Course.BUSINESS.name));
+        tdao.addTrainee(new Trainee(24, Course.DATA.name));
+        tdao.addTrainee(new Trainee(25, Course.DEVOPS.name));
 
         tdao.addTrainingCentre(new TrainingHub(12) {
         });
         tdao.addTrainingCentre( new TrainingHub(15));
+        tdao.addTrainingCentre( new TrainingHub(100));
+        tdao.addTrainingCentre( new BootCamp(500));
 
         for (int i = 200; i < 300; i++) {
             tdao.addTrainee(i);
@@ -196,14 +198,18 @@ public class TraineeDAO {
             String sql = "CREATE TABLE training_centres " +
                     "(centre_id int, capacity int," +
                     "PRIMARY KEY (centre_id))";
+
             statement.executeUpdate(sql);
 
-            statement.executeUpdate("CREATE TABLE trainees (" +
-                    "trainee_id int, " +
-                    "centre_id int," +
-                    "PRIMARY KEY (trainee_id)," +
-                    "FOREIGN KEY (centre_id) REFERENCES training_centres(centre_id));"
-            );
+            sql = """
+                    CREATE TABLE trainees (
+                    trainee_id int, 
+                    centre_id int,
+                    course VARCHAR(50),
+                    PRIMARY KEY (trainee_id),
+                    FOREIGN KEY (centre_id) REFERENCES training_centres(centre_id));
+            """;
+            statement.executeUpdate(sql);
 
             statement.close();
 
@@ -217,10 +223,11 @@ public class TraineeDAO {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement("" +
-                    "INSERT INTO trainees (trainee_id, centre_id)" +
-                    "VALUES (?, null)"
+                    "INSERT INTO trainees (trainee_id, course ,centre_id)" +
+                    "VALUES (?, null, null)"
             );
             preparedStatement.setInt(1, traineeId);
+
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
@@ -241,11 +248,12 @@ public class TraineeDAO {
                 chosenCentre = ids[random.nextInt(ids.length)];
             }
             preparedStatement = connection.prepareStatement("" +
-                    "INSERT INTO trainees (trainee_id, centre_id)" +
-                    "VALUES (?, ?)"
+                    "INSERT INTO trainees (trainee_id, centre_id, course)" +
+                    "VALUES (?, ?, ?)"
             );
             preparedStatement.setInt(1, t.getTraineeID());
             preparedStatement.setObject(2, chosenCentre);
+            preparedStatement.setString(3, t.getTraineeCourse());
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
@@ -424,13 +432,15 @@ public class TraineeDAO {
         Statement statement  = null;
         try {
             statement = this.connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT trainee_id, centre_id FROM trainees WHERE centre_id IS NOT NULL ");
+            ResultSet rs = statement.executeQuery("SELECT trainee_id, centre_id, course FROM trainees WHERE centre_id IS NOT NULL ");
             ArrayList<Trainee> trainees = new ArrayList<>();
             while (rs.next()){
                 int id = rs.getInt("trainee_id");
                 Trainee trainee = new Trainee(id);
                 trainee.setCentreId(rs.getInt("centre_id"));
+                trainee.setCourse(rs.getString("course"));
                 trainees.add(trainee);
+                trainees.add(new Trainee(id, Course.JAVA.name));
             }
             statement.close();
             Trainee[] traineesList = new Trainee[trainees.size()];
@@ -486,12 +496,17 @@ public class TraineeDAO {
             statement = this.connection.createStatement();
             ResultSet rs = null;
 
-            rs = statement.executeQuery("SELECT trainee_id FROM trainees WHERE centre_id IS NULL;");
+            rs = statement.executeQuery("SELECT trainee_id, course FROM trainees WHERE centre_id IS NULL;");
 
             ArrayList<Trainee> trainees = new ArrayList<>();
             while (rs.next()){
                 int id = rs.getInt("trainee_id");
-                trainees.add(new Trainee(id));
+                String course = rs.getString("course");
+                Trainee trainee = new Trainee(id);
+                trainee.setCourse(course);
+
+                trainees.add(trainee);
+
             }
             statement.close();
             Trainee[] traineesList = new Trainee[trainees.size()];
