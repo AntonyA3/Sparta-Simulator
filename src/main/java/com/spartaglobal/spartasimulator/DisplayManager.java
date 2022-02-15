@@ -20,7 +20,6 @@ public class DisplayManager {
         TRAINEES_WAITING("Number of trainees on the waiting list: %d"),
         DATA_CHOICE("Do you want to print the data each month (M) or after completing the simulation (S)?: "),
         SIMULATION_COMPLETE("Simulation complete");
-
         public final String message;
         Message(String message) {
             this.message = message;
