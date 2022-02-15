@@ -39,5 +39,6 @@ public class TraineeFactory {
         Course[] courses = Course.values();
         return courses[rand.nextInt(courses.length)].name;
     }
-    
+
+    public HashMap<String, Integer> getCourseCounts() { return courseCounts; }
 }
