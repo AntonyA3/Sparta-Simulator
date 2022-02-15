@@ -6,6 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.Random;
 
 public class TraineeDAO {
     private Connection connection = null;
@@ -20,23 +21,85 @@ public class TraineeDAO {
         tdao.addTrainee(new Trainee(24));
         tdao.addTrainee(new Trainee(25));
 
-        tdao.addTrainingCentre( new TrainingCentre(12, 100));
-        tdao.addTrainingCentre( new TrainingCentre(15, 100));
+        tdao.addTrainingCentre(new TrainingHub(12) {
+        });
+        tdao.addTrainingCentre( new TrainingHub(15));
 
         for (int i = 200; i < 300; i++) {
             tdao.addTrainee(i);
             tdao.updateTraineesTrainingCentre(i, 15);
         }
         tdao.updateTraineesTrainingCentre(25, 12);
-        //System.out.println(tdao.getWaitingTrainees(false).length);
-        //tdao.removeTraineesFromWaitingList();
+        System.out.println(tdao.getWaitingTrainees(false).length);
+        tdao.removeTraineesFromWaitingList();
         System.out.println("Waiting trainees " + tdao.getWaitingTrainees(false).length);
-        System.out.println("All full" + tdao.isAllCentresFull());
+        System.out.println("All Training Centres full: " + tdao.isAllCentresFull());
         System.out.println(Arrays.toString(tdao.getIdsOfNoneFullTrainingCentres()));
         System.out.println("Number Of trainees currently training: " + tdao.getTrainingTraineesCount());
         System.out.println("Number of trainees on waiting list: " + tdao.getWaitingTraineesCount());
         System.out.println("Number of Full Training centres: " + tdao.getFullTrainingCentreCount());
+        System.out.println("Number of Open Training Centres: " + tdao.getOpenTrainingCentreCount());
+
+
+        System.out.println("These Trainees can be moved " + Arrays.toString(tdao.getIdOfTraineesInFullCentres()));
         tdao.closeConnection();
+    }
+
+    public int[] getIdOfTraineesInFullCentres(){
+         Statement statement = null;
+        try {
+            statement = connection.createStatement();
+
+             String sql ="""
+                SELECT trainee_id 
+                FROM trainees
+                WHERE centre_id IN (
+                    SELECT centre_id FROM (
+                        SELECT tc.centre_id, tc.capacity, COUNT(t.trainee_id) AS occupancy
+                        FROM training_centres tc 
+                        INNER JOIN trainees t 
+                        ON t.centre_id = tc.centre_id
+                        GROUP BY tc.centre_id, tc.capacity
+                        HAVING COUNT(t.trainee_id) = tc.capacity
+                    )fc
+                );
+                """;
+
+            ResultSet rs = statement.executeQuery(sql);
+            ArrayList<Integer> intArrayList = new ArrayList<>();
+            while (rs.next()){
+                intArrayList.add(rs.getInt("trainee_id"));
+            }
+            int[] intArray = new int[intArrayList.size()];
+            for (int i = 0; i < intArrayList.size(); i++) {
+                intArray[i] = intArrayList.get(i);
+            }
+            return intArray;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return new int[0];
+
+    }
+
+    private int getOpenTrainingCentreCount() {
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+            ResultSet rs = null;
+            rs = statement.executeQuery(
+                    "SELECT COUNT(centre_id) AS centre_count FROM training_centres;"
+            );
+
+            while (rs.next()){
+                return rs.getInt("centre_count");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     private int getFullTrainingCentreCount() {
@@ -44,18 +107,20 @@ public class TraineeDAO {
         try {
             statement = connection.createStatement();
             ResultSet rs = null;
-            rs = statement.executeQuery(
-                    "SELECT COUNT(centre_id) AS full_centre_count FROM ( " +
-                            "SELECT centre_id, capacity ,COUNT(*) AS occupancy FROM (" +
-                            "SELECT tc.centre_id, tc.capacity, t.trainee_id " +
-                            "FROM training_centres tc " +
-                            "INNER JOIN trainees t " +
-                            "ON t.centre_id = tc.centre_id " +
-                            ") nt " +
-                            "GROUP BY centre_id" +
-                            " ) cid WHERE occupancy = capacity"
+            String sql = """
+                SELECT COUNT(centre_id) AS full_centre_count 
+                FROM (
+                    SELECT tc.centre_id, tc.capacity , COUNT(t.trainee_id) AS occupancy
+                    FROM training_centres tc 
+                    INNER JOIN trainees t 
+                    ON t.centre_id = tc.centre_id
+                    GROUP BY tc.centre_id, tc.capacity
+                    HAVING COUNT(t.trainee_id) = tc.capacity
+                 )nt;
+            """;
 
-            );
+            rs = statement.executeQuery(sql);
+
 
             while (rs.next()){
                 return rs.getInt("full_centre_count");
@@ -163,6 +228,31 @@ public class TraineeDAO {
         }
     }
 
+    private void addTraineedOrSetToWaiting(Trainee t){
+        if (t == null) return;
+
+        PreparedStatement preparedStatement = null;
+        try {
+            int[] ids = getIdsOfNoneFullTrainingCentres();
+            Random random = new Random();
+
+            Integer chosenCentre = null;
+            if(ids.length > 0) {
+                chosenCentre = ids[random.nextInt(ids.length)];
+            }
+            preparedStatement = connection.prepareStatement("" +
+                    "INSERT INTO trainees (trainee_id, centre_id)" +
+                    "VALUES (?, ?)"
+            );
+            preparedStatement.setInt(1, t.getTraineeID());
+            preparedStatement.setObject(2, chosenCentre);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void addTrainee(Trainee t) {
         if (t == null) return;
 
@@ -174,7 +264,7 @@ public class TraineeDAO {
                     "VALUES (?, ?)"
             );
             preparedStatement.setInt(1, t.getTraineeID());
-            preparedStatement.setObject(2, null);
+            preparedStatement.setObject(2, t.getCentreId());
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
@@ -334,11 +424,13 @@ public class TraineeDAO {
         Statement statement  = null;
         try {
             statement = this.connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT trainee_id FROM trainees WHERE centre_id IS NOT NULL ");
+            ResultSet rs = statement.executeQuery("SELECT trainee_id, centre_id FROM trainees WHERE centre_id IS NOT NULL ");
             ArrayList<Trainee> trainees = new ArrayList<>();
             while (rs.next()){
                 int id = rs.getInt("trainee_id");
-                trainees.add(new Trainee(id));
+                Trainee trainee = new Trainee(id);
+                trainee.setCentreId(rs.getInt("centre_id"));
+                trainees.add(trainee);
             }
             statement.close();
             Trainee[] traineesList = new Trainee[trainees.size()];
