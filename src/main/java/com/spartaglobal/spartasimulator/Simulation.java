@@ -10,9 +10,13 @@ public class Simulation {
     private static final int DEFAULT_CENTRE_CAPACITY = 100;
     private static final int MAX_TRAINEES_CENTRE_TAKE = 50;
 
-    public static void simulate(int months, TraineeDAO tdao){
+    public static void simulate(int months, boolean infoGivenMonthly, TraineeDAO tdao){
         TraineeFactory tf = new TraineeFactory();
-        for(int i = 0; i < months; i++) loop(i, tdao, tf);
+        for(int i = 0; i < months; i++) {
+            loop(i, tdao, tf);
+            if(infoGivenMonthly) DisplayManager.printSystemInfo(tdao);
+        }
+        if(!infoGivenMonthly) DisplayManager.printSystemInfo(tdao);
     }
 
     private static void loop(int month, TraineeDAO tdao, TraineeFactory tf){
