@@ -10,6 +10,9 @@ public class Main {
     public static Logger logger;
     public static void main(String[] args) {
         boolean appShouldContinue = true;
+        TraineeDAO tDAO = new TraineeDAO();
+        tDAO.openConnection();
+
         do {
             Integer months = null;
             while (months == null) {
@@ -28,13 +31,8 @@ public class Main {
             }
             Simulation simulation = new Simulation();
             System.out.println(String.format("Run the System for %d months", months.intValue()));
-            simulation.simulate(months.intValue());
+            simulation.simulate(months.intValue(), tDAO);
             System.out.println("Simulation complete");
-
-            System.out.println(String.format("Number of open centres open: %d", simulation.getOpenCentres()));
-            System.out.println(String.format("Number of full centres: %d", simulation.getOpenCentres()));
-            System.out.println(String.format("Number of trainees currently training: %d", simulation.getTraineesTraining()));
-            System.out.println(String.format("Number of trainees on the waiting list: %d", simulation.getTraineesWaiting()));
 
             System.out.println("continue: yes or no:\n" +
                     "\tyes\tno |default option is close");

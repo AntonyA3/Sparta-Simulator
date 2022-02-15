@@ -2,7 +2,7 @@
 *.idea
 *target
 *Sparta-Simulator.iml
-
+*.iml
 
 # Compiled class file
 *.class
