@@ -13,5 +13,5 @@ public class Trainee {
     public int getTraineeID(){
         return traineeID;
     }
-    public String getTraineeCourse() { return course;}
+    public String getCourse() { return course;}
 }
