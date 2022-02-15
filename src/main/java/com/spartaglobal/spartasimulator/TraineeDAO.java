@@ -37,6 +37,8 @@ public class TraineeDAO {
         System.out.println("Waiting trainees " + tdao.getWaitingTrainees(false).length);
         System.out.println("All Training Centres full: " + tdao.isAllCentresFull());
         System.out.println(Arrays.toString(tdao.getIdsOfNoneFullTrainingCentres()));
+        System.out.println("Removing The underoccupied training centres: ");
+        tdao.removeCentresWithOccupancyBelow(25);
         System.out.println("Number Of trainees currently training: " + tdao.getTrainingTraineesCount());
         System.out.println("Number of trainees on waiting list: " + tdao.getWaitingTraineesCount());
         System.out.println("Number of Full Training centres: " + tdao.getFullTrainingCentreCount());
@@ -86,7 +88,7 @@ public class TraineeDAO {
 
     }
 
-    private int getOpenTrainingCentreCount() {
+    public int getOpenTrainingCentreCount() {
         Statement statement = null;
         try {
             statement = connection.createStatement();
@@ -104,7 +106,7 @@ public class TraineeDAO {
         return 0;
     }
 
-    private int getFullTrainingCentreCount() {
+    public int getFullTrainingCentreCount() {
         Statement statement = null;
         try {
             statement = connection.createStatement();
@@ -127,11 +129,6 @@ public class TraineeDAO {
             while (rs.next()){
                 return rs.getInt("full_centre_count");
             }
-//            int[] intArray = new int[intArrayList.size()];
-//            for (int i = 0; i < intArrayList.size(); i++) {
-//                intArray[i] = intArrayList.get(i);
-//            }
-//            return  intArray;
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -139,7 +136,7 @@ public class TraineeDAO {
         return 0;
     }
 
-    private int getWaitingTraineesCount() {
+    public int getWaitingTraineesCount() {
         Statement statement = null;
         try {
             statement = this.connection.createStatement();
@@ -235,7 +232,7 @@ public class TraineeDAO {
         }
     }
 
-    private void addTraineedOrSetToWaiting(Trainee t){
+    public void addTraineedOrSetToWaiting(Trainee t){
         if (t == null) return;
 
         PreparedStatement preparedStatement = null;
@@ -263,16 +260,16 @@ public class TraineeDAO {
 
     public void addTrainee(Trainee t) {
         if (t == null) return;
+
         PreparedStatement preparedStatement = null;
         try {
 
             preparedStatement = connection.prepareStatement("" +
-                    "INSERT INTO trainees (trainee_id, centre_id, course)" +
-                    "VALUES (?, ?, ?)"
+                    "INSERT INTO trainees (trainee_id, centre_id)" +
+                    "VALUES (?, ?)"
             );
             preparedStatement.setInt(1, t.getTraineeID());
             preparedStatement.setObject(2, t.getCentreId());
-            preparedStatement.setObject(3, t.getTraineeCourse());
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
@@ -313,20 +310,6 @@ public class TraineeDAO {
             e.printStackTrace();
         }
     }
-//    public void addTrainingCentre(){
-//        PreparedStatement preparedStatement = null;
-//        try {
-//            preparedStatement = connection.prepareStatement("" +
-//                    "INSERT INTO training_centres(trainee_id)" +
-//                    "VALUES (?,?)"
-//            );
-//            //preparedStatement.setInt(1, t.getTraineeID());
-//
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        Random random = new Random();
-//    }
 
     boolean isAllCentresFull(){
         Statement statement = null;
@@ -376,6 +359,7 @@ public class TraineeDAO {
     }
 
 
+
     public int getTrainingTraineesCount(){
         Statement statement  = null;
         try {
@@ -404,25 +388,6 @@ public class TraineeDAO {
         }
 
 
-//        try {
-//            PreparedStatement preparedStatement = connection.prepareStatement();
-//
-//
-//        }
-//
-//        try {
-//            ArrayList<Integer> capacities = new ArrayList<>();
-//            while (rs.next()){
-//                capacities.add(rs.getInt("capacity"));
-//            }
-//            int[] capacityArray = new int[capacities.size()];
-//            for (int i = 0; i < capacityArray.length; i++) {
-//                capacityArray[i] = capacities.get(i);
-//            }
-//            return capacityArray;
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
         return new int[0];
     }
 
@@ -456,21 +421,32 @@ public class TraineeDAO {
 
 
 
+    private String trainingCentreCapacityOccupancyQuery(){
+        return """
+                SELECT centre_id, capacity ,COUNT(*) AS occupancy FROM (
+                        SELECT tc.centre_id, tc.capacity, t.trainee_id 
+                        FROM training_centres tc 
+                        INNER JOIN trainees t
+                        ON t.centre_id = tc.centre_id
+                    ) nt
+                    GROUP BY centre_id
+                
+        """;
+    }
     public int[] getIdsOfNoneFullTrainingCentres(){
         Statement statement = null;
         try {
             statement = connection.createStatement();
             ResultSet rs = null;
+            String sql = String.format( """
+                   SELECT centre_id FROM (
+                        %s
+                     ) cid WHERE occupancy < capacity
+                    
+                    """, trainingCentreCapacityOccupancyQuery());
             rs = statement.executeQuery(
-                    "SELECT centre_id FROM ( " +
-                            "SELECT centre_id, capacity ,COUNT(*) AS occupancy FROM (" +
-                            "SELECT tc.centre_id, tc.capacity, t.trainee_id " +
-                            "FROM training_centres tc " +
-                            "INNER JOIN trainees t " +
-                            "ON t.centre_id = tc.centre_id " +
-                            ") nt " +
-                            "GROUP BY centre_id" +
-                            " ) cid WHERE occupancy < capacity"
+                    sql
+
             );
 
             ArrayList<Integer> intArrayList = new ArrayList<Integer>();
@@ -540,6 +516,28 @@ public class TraineeDAO {
         }
     }
 
+    /**Currently Implementing**/
+//    public void removeCentresWithOccupancyBelow(int minOccupancy){
+//        PreparedStatement preparedStatement = null;
+//        try {
+//
+//            String sql =String.format("""
+//                DELETE FROM training_centres tc
+//                INNER JOIN %s
+//                ON tc.centre_id =
+//                 tc WHERE occupancy < ?;
+//            """, trainingCentreCapacityOccupancyQuery());
+//            preparedStatement = this.connection.prepareStatement(sql);
+//            preparedStatement.setInt(1, minOccupancy);
+//            preparedStatement.executeUpdate();
+//            preparedStatement.close();
+//
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//
+//    }
+
     public void removeTraineesFromWaitingList() {
         Statement statement = null;
         try {
@@ -553,6 +551,4 @@ public class TraineeDAO {
             e.printStackTrace();
         }
     }
-
-
 }
