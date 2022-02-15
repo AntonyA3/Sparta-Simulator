@@ -19,7 +19,6 @@ public class DisplayManager {
         TRAINEES_TRAINING("Number of trainees currently training: %d"),
         TRAINEES_WAITING("Number of trainees on the waiting list: %d"),
         SIMULATION_COMPLETE("Simulation complete");
-
         public final String message;
         Message(String message) {
             this.message = message;
