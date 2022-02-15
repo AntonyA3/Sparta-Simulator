@@ -4,25 +4,44 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Properties;
-import java.util.Random;
 
 public class TraineeDAO {
-    private Connection connection;
+    private Connection connection = null;
     private static int centreId = 0;
+    //Training DAO Demo
+    public static void main(String[] args) {
+        TraineeDAO tdao = new TraineeDAO();
+        tdao.openConnection();
+        tdao.createTables();
+        tdao.addTrainee(new Trainee(12));
+        tdao.addTrainee(new Trainee(23));
+        tdao.addTrainee(new Trainee(24));
+        tdao.addTrainee(new Trainee(25));
+
+        tdao.addTrainingCentre( new TrainingCentre(12, 100));
+        System.out.println(tdao.getWaitingTrainees(false).length);
+        tdao.removeTraineesFromWaitingList();
+        System.out.println("Waiting trainees " + tdao.getWaitingTrainees(false).length);
+        tdao.closeConnection();
+    }
     public TraineeDAO(){
 
     }
 
     public void openConnection(){
-        Properties props = new Properties();
+
         try {
-            props.load(new FileReader("mysql.properties"));
-            this.connection = DriverManager.getConnection(
+            if(this.connection == null) {
+                Properties props = new Properties();
+                props.load(new FileReader("mysql.properties"));
+                connection = DriverManager.getConnection(
                     props.getProperty("dburl"),
                     props.getProperty("dbuserid"),
-                    props.getProperty("dbpassword")
-            );
+                    props.getProperty("dbpassword"));
+            }
+
         } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
@@ -31,6 +50,7 @@ public class TraineeDAO {
     public void closeConnection(){
         try {
             this.connection.close();
+            this.connection = null;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -39,18 +59,23 @@ public class TraineeDAO {
     public void createTables() {
         Statement statement  = null;
         try {
-
             statement = this.connection.createStatement();
-            statement.executeQuery("CREATE TABLE training_centres (" +
-                    "centre_id int PRIMARY KEY"
-            );
-            statement.close();
+            statement.executeUpdate("DROP TABLE IF EXISTS trainees_training_centres");
+            statement.executeUpdate("DROP TABLE IF EXISTS trainees;");
+            statement.executeUpdate("DROP TABLE IF EXISTS training_centres;");
 
-            statement = this.connection.createStatement();
-            statement.executeQuery("CREATE TABLE trainees (" +
-                    "trainee_id int PRIMARY KEY," +
-                    "centre_id int FOREIGN KEY);"
+            String sql = "CREATE TABLE training_centres " +
+                    "(centre_id int PRIMARY KEY, capacity int)";
+            statement.executeUpdate(sql);
+
+            statement.executeUpdate("CREATE TABLE trainees (" +
+                    "trainee_id int," +
+                    "PRIMARY KEY (trainee_id));"
             );
+            statement.executeUpdate("CREATE TABLE trainees_training_centres" +
+                    "(centre_id int, trainee_id int, PRIMARY KEY (trainee_id))"
+            );
+
             statement.close();
 
         } catch (SQLException e) {
@@ -64,17 +89,39 @@ public class TraineeDAO {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement("" +
-                    "INSERT INTO trainees(trainee_id, centre_id)" +
-                    "VALUES (?, null)"
+                    "INSERT INTO trainees (trainee_id)" +
+                    "VALUES (?)"
             );
             preparedStatement.setInt(1, t.getTraineeID());
+            preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void addTrainingCentre(){
+    public void addTrainingCentre(TrainingCentre t){
+        if (t == null) return;
+
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement("" +
+                    "INSERT INTO training_centres(centre_id, capacity)" +
+                    "VALUES (?, ?)"
+            );
+            preparedStatement.setInt(1, t.getTrainingCentreID());
+            preparedStatement.setInt(2, t.getTrainingCentreCapacity());
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addTraineeToTrainingCentre(int traineeId){
+
+    }
+//    public void addTrainingCentre(){
 //        PreparedStatement preparedStatement = null;
 //        try {
 //            preparedStatement = connection.prepareStatement("" +
@@ -87,14 +134,27 @@ public class TraineeDAO {
 //            e.printStackTrace();
 //        }
 //        Random random = new Random();
-
-    }
+//    }
 
     public int[] getCentreCapacities(){
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT capacity, COUNT() FROM training_centres, ;");
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+//        try {
+//            PreparedStatement preparedStatement = connection.prepareStatement();
+//
+//
+//        }
 //
 //        try {
-//            Statement statement = connection.createStatement();
-//            ResultSet rs = statement.executeQuery("SELECT capacity FROM training_centres;");
 //            ArrayList<Integer> capacities = new ArrayList<>();
 //            while (rs.next()){
 //                capacities.add(rs.getInt("capacity"));
@@ -110,11 +170,13 @@ public class TraineeDAO {
         return new int[0];
     }
 
+
+
     public Trainee[] getTrainingTrainees() {
         Statement statement  = null;
         try {
             statement = this.connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT trainee_id FROM trainees WHERE centre_id IS NOT NULL;");
+            ResultSet rs = statement.executeQuery("SELECT trainee_id FROM trainees_training_centres");
             ArrayList<Trainee> trainees = new ArrayList<>();
             while (rs.next()){
                 int id = rs.getInt("trainee_id");
@@ -138,7 +200,7 @@ public class TraineeDAO {
             statement = this.connection.createStatement();
             ResultSet rs = null;
 
-            statement.executeQuery("SELECT trainee_id FROM trainees WHERE centre_id IS NULL;");
+            rs = statement.executeQuery("SELECT trainee_id FROM trainees;");
 
             ArrayList<Trainee> trainees = new ArrayList<>();
             while (rs.next()){
@@ -150,9 +212,9 @@ public class TraineeDAO {
             for(int i = 0; i < traineesList.length; i++){
                 traineesList[i] = trainees.get(i);
             }
-            if(removeTrainees){
-                statement.executeQuery("DELETE trainee WHERE centre_id IS NULL");
-            }
+//            if(removeTrainees){
+//                statement.executeQuery("DELETE trainee WHERE centre_id IS NULL");
+//            }
             return traineesList;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -164,15 +226,15 @@ public class TraineeDAO {
         Statement statement = null;
         try {
             statement = this.connection.createStatement();
-            ResultSet rs = null;
-
-            statement.executeQuery("DELETE trainee WHERE centre_id IS NULL");
+            //ResultSet rs = null;
+            statement.executeUpdate("DELETE FROM trainees WHERE trainee_id NOT IN " +
+                    "(SELECT trainee_id FROM trainees_training_centres)");
 
             ArrayList<Trainee> trainees = new ArrayList<>();
-            while (rs.next()){
-                int id = rs.getInt("trainee_id");
-                trainees.add(new Trainee(id));
-            }
+//            while (rs.next()){
+//                int id = rs.getInt("trainee_id");
+//                trainees.add(new Trainee(id));
+//            }
             statement.close();
 
         } catch (SQLException e) {
