@@ -15,13 +15,13 @@ public class TraineeDAO {
         TraineeDAO tdao = new TraineeDAO();
         tdao.openConnection();
         tdao.createTables();
-        tdao.addTrainee(new Trainee(12));
-        tdao.addTrainee(new Trainee(23));
-        tdao.addTrainee(new Trainee(24));
-        tdao.addTrainee(new Trainee(25));
+        tdao.addTrainee(new Trainee(12, Course.JAVA.name));
+        tdao.addTrainee(new Trainee(23, Course.BUSINESS.name));
+        tdao.addTrainee(new Trainee(24, Course.DATA.name));
+        tdao.addTrainee(new Trainee(25, Course.DEVOPS.name));
 
-        tdao.addTrainingCentre( new TrainingCentre(12, 100));
-        tdao.addTrainingCentre( new TrainingCentre(15, 100));
+        tdao.addTrainingCentre( new TrainingHub(100));
+        tdao.addTrainingCentre( new BootCamp(500));
 
         for (int i = 200; i < 300; i++) {
             tdao.addTrainee(i);
@@ -338,7 +338,7 @@ public class TraineeDAO {
             ArrayList<Trainee> trainees = new ArrayList<>();
             while (rs.next()){
                 int id = rs.getInt("trainee_id");
-                trainees.add(new Trainee(id));
+                trainees.add(new Trainee(id, Course.JAVA.name));
             }
             statement.close();
             Trainee[] traineesList = new Trainee[trainees.size()];
@@ -399,7 +399,7 @@ public class TraineeDAO {
             ArrayList<Trainee> trainees = new ArrayList<>();
             while (rs.next()){
                 int id = rs.getInt("trainee_id");
-                trainees.add(new Trainee(id));
+                trainees.add(new Trainee(id, Course.DEVOPS.name));
             }
             statement.close();
             Trainee[] traineesList = new Trainee[trainees.size()];
