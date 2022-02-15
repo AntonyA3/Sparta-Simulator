@@ -17,6 +17,7 @@ public class Simulation {
 
     private static void loop(int month, TraineeDAO tdao, TraineeFactory tf){
         if((month % 2) == 1) tdao.addTrainingCentre(null);
+
         Arrays.stream(tdao.getWaitingTrainees(true)).forEach(t -> tdao.addTrainee(t));
         Arrays.stream(tf.getNewTrainees(MIN_GENERATED_TRAINEES, MAX_GENERATED_TRAINEES)).forEach(t -> tdao.addTrainee(t));
     }
