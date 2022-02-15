@@ -36,7 +36,7 @@ public class TraineeDAOTest {
     @Test
     @DisplayName("Given adding a training centre, addTrainingCentre, should not throw an exception")
     public void givenAddingTrainingCentre_addTrainingCentre_DoesNotThrowException(){
-        TrainingCentre trainingCentre = new TrainingCentre(12, 100);
+        TrainingHub trainingCentre = new TrainingHub(100);
         assertDoesNotThrow(() -> tDAO.addTrainingCentre(trainingCentre));
     }
 
