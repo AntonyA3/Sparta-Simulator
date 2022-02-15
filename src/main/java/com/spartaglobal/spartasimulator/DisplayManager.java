@@ -11,7 +11,10 @@ public class DisplayManager {
     private static Logger logger = LogManager.getLogger("Display Manager");
 
     public enum Message{
+        SIMULATION_START("Simulation starting."),
         MONTHS("Please, enter the simulation length in months: "),
+        INFO_GIVEN_MONTHLY("Would you like the simulation to print information monthly (M), or only after the simulation ends (S)?"),
+        INVALID_INPUT("Invalid input."),
         INVALID_INPUT_MONTHS("Invalid input. " + MONTHS.message),
         TOTAL_MONTHS("Run the System for %d months."),
         CENTRES_OPEN("Number of open centres open: %d"),
@@ -30,6 +33,14 @@ public class DisplayManager {
         Scanner scanner = new Scanner(System.in);
         String input = scanner.next();
         return input;
+    }
+
+    public static void printMessage(Message m) {
+        System.out.println(m.message);
+    }
+
+    public static void printMessage(Message m, int intValue) {
+        System.out.println(String.format(m.message, intValue));
     }
 
     public static void printSystemInfo(TraineeDAO traineeDao){
