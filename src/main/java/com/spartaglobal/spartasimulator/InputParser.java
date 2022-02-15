@@ -1,5 +1,7 @@
 package com.spartaglobal.spartasimulator;
 
+import java.util.Arrays;
+
 public class InputParser {
 
     public static int parseInt(String s, int min, int max){
@@ -14,9 +16,8 @@ public class InputParser {
         return 0;
     }
 
-    public static boolean parseBoolean(String s, String[] trueFalseValues) throws InvalidInputException {
-        if(s.equalsIgnoreCase(trueFalseValues[0])) return true;
-        if(s.equalsIgnoreCase(trueFalseValues[1])) return false; // else
-        throw new InvalidInputException();
+    public static String parseOption(String s, String[] options){
+        for(String o : options) if(o.equalsIgnoreCase(s)) return o; // else
+        return null;
     }
 }
