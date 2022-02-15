@@ -13,4 +13,10 @@ public class InputParser {
         }
         return 0;
     }
+
+    public static boolean parseBoolean(String s, String[] trueFalseValues) throws InvalidInputException {
+        if(s.equalsIgnoreCase(trueFalseValues[0])) return true;
+        if(s.equalsIgnoreCase(trueFalseValues[1])) return false; // else
+        throw new InvalidInputException();
+    }
 }
