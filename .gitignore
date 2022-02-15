@@ -3,6 +3,7 @@
 *target
 *Sparta-Simulator.iml
 *.iml
+mysql.properties
 
 # Compiled class file
 *.class
