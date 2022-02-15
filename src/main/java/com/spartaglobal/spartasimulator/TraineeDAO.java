@@ -86,7 +86,7 @@ public class TraineeDAO {
 
     }
 
-    private int getOpenTrainingCentreCount() {
+    public int getOpenTrainingCentreCount() {
         Statement statement = null;
         try {
             statement = connection.createStatement();
@@ -104,7 +104,7 @@ public class TraineeDAO {
         return 0;
     }
 
-    private int getFullTrainingCentreCount() {
+    public int getFullTrainingCentreCount() {
         Statement statement = null;
         try {
             statement = connection.createStatement();
@@ -139,7 +139,7 @@ public class TraineeDAO {
         return 0;
     }
 
-    private int getWaitingTraineesCount() {
+    public int getWaitingTraineesCount() {
         Statement statement = null;
         try {
             statement = this.connection.createStatement();
@@ -235,7 +235,7 @@ public class TraineeDAO {
         }
     }
 
-    private void addTraineedOrSetToWaiting(Trainee t){
+    public void addTraineedOrSetToWaiting(Trainee t){
         if (t == null) return;
 
         PreparedStatement preparedStatement = null;
