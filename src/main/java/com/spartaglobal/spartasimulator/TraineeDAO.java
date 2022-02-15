@@ -263,16 +263,16 @@ public class TraineeDAO {
 
     public void addTrainee(Trainee t) {
         if (t == null) return;
-
         PreparedStatement preparedStatement = null;
         try {
 
             preparedStatement = connection.prepareStatement("" +
-                    "INSERT INTO trainees (trainee_id, centre_id)" +
-                    "VALUES (?, ?)"
+                    "INSERT INTO trainees (trainee_id, centre_id, course)" +
+                    "VALUES (?, ?, ?)"
             );
             preparedStatement.setInt(1, t.getTraineeID());
             preparedStatement.setObject(2, t.getCentreId());
+            preparedStatement.setObject(3, t.getTraineeCourse());
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
@@ -471,7 +471,6 @@ public class TraineeDAO {
                             ") nt " +
                             "GROUP BY centre_id" +
                             " ) cid WHERE occupancy < capacity"
-
             );
 
             ArrayList<Integer> intArrayList = new ArrayList<Integer>();
@@ -554,4 +553,6 @@ public class TraineeDAO {
             e.printStackTrace();
         }
     }
+
+
 }
