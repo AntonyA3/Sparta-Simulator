@@ -7,7 +7,7 @@ public class TraineeFactory {
     private final int STARTING_ID = 0;
 
     public TraineeFactory(){
-        nextID = 0;
+        nextID = STARTING_ID;
     }
 
     public int getNextID(){
