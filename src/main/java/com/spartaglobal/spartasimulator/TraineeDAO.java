@@ -38,7 +38,7 @@ public class TraineeDAO {
         System.out.println("All Training Centres full: " + tdao.isAllCentresFull());
         System.out.println(Arrays.toString(tdao.getIdsOfNoneFullTrainingCentres()));
         System.out.println("Removing The underoccupied training centres: ");
-        tdao.removeCentresWithOccupancyBelow(25);
+//        tdao.removeCentresWithOccupancyBelow(25);
         System.out.println("Number Of trainees currently training: " + tdao.getTrainingTraineesCount());
         System.out.println("Number of trainees on waiting list: " + tdao.getWaitingTraineesCount());
         System.out.println("Number of Full Training centres: " + tdao.getFullTrainingCentreCount());
@@ -224,7 +224,6 @@ public class TraineeDAO {
                     "VALUES (?, null, null)"
             );
             preparedStatement.setInt(1, traineeId);
-
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
@@ -265,11 +264,12 @@ public class TraineeDAO {
         try {
 
             preparedStatement = connection.prepareStatement("" +
-                    "INSERT INTO trainees (trainee_id, centre_id)" +
-                    "VALUES (?, ?)"
+                    "INSERT INTO trainees (trainee_id, centre_id, course)" +
+                    "VALUES (?, ?, ?)"
             );
             preparedStatement.setInt(1, t.getTraineeID());
             preparedStatement.setObject(2, t.getCentreId());
+            preparedStatement.setObject(3, t.getTraineeCourse());
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
@@ -446,7 +446,6 @@ public class TraineeDAO {
                     """, trainingCentreCapacityOccupancyQuery());
             rs = statement.executeQuery(
                     sql
-
             );
 
             ArrayList<Integer> intArrayList = new ArrayList<Integer>();

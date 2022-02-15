@@ -11,7 +11,7 @@ public class DisplayManager {
         tdao.openConnection();
         tdao.createTables();
         TraineeFactory traineesF = new TraineeFactory();
-        Trainee[] trainees = traineesF.getNewTrainees(200, 500);
+        Trainee[] trainees = traineesF.getNewTrainees(20, 100);
         tdao.addTrainingCentre(new TrainingHub(1));
         tdao.addTrainingCentre( new TrainingHub(2));
         tdao.addTrainingCentre( new TrainingHub(3));
