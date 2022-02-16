@@ -3,7 +3,6 @@ package com.spartaglobal.spartasimulator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.xml.transform.Result;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -69,10 +68,10 @@ public class DisplayManager {
 
     public static void printSystemInfo(TraineeDAO traineeDao){
         Map<String,Integer> traineesCourse = new HashMap<>();
-        Map<String,Integer> traineesCourseWaiting = new HashMap<>();
+        Map<String,Integer> traineesWaitingCourse = new HashMap<>();
         ResultSet openCentresCourse = traineeDao.getOpenCentresByCourse();
         ResultSet fullCentresCourse = traineeDao.getFullCentresByCourse();
-        ResultSet closeCentresCourse = traineeDao.getCloseCentresByCourse();
+//        ResultSet closeCentresCourse = traineeDao.getCloseCentresByCourse();
 
         String traineeCourse;
 
@@ -89,72 +88,65 @@ public class DisplayManager {
         for (Trainee trainee : traineeDao.getWaitingTrainees(false))
         {
             traineeCourse = trainee.getTraineeCourse();
-            if (traineesCourseWaiting.containsKey(traineeCourse)) {
-                traineesCourseWaiting.put(traineeCourse,traineesCourseWaiting.get(traineeCourse) + 1);
+            if (traineesWaitingCourse.containsKey(traineeCourse)) {
+                traineesWaitingCourse.put(traineeCourse,traineesWaitingCourse.get(traineeCourse) + 1);
             } else {
-                traineesCourseWaiting.put(traineeCourse, 1);
+                traineesWaitingCourse.put(traineeCourse, 1);
             }
         }
 
-        System.out.println("------------------ Open ------------------");
+        System.out.println("------------------ Open Centres ------------------");
 
         while (true) {
             try {
                 if (!openCentresCourse.next()) {
                     break;
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                System.out.print(openCentresCourse.getInt(1));
-                System.out.print(" ");
-                System.out.print(openCentresCourse.getString(2));
-                System.out.println();
+                System.out.print(openCentresCourse.getString(2) + ": " +
+                        openCentresCourse.getInt(1) + "\n"
+                );
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
 
-        System.out.println("------------------ Full ------------------");
+        System.out.println("------------------ Full Centres ------------------");
         while (true) {
             try {
                 if (!fullCentresCourse.next()) {
                     break;
                 }
+                System.out.print(fullCentresCourse.getString(2) + ": " +
+                        fullCentresCourse.getInt(1) + "\n"
+                );
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            try {
-                System.out.print(fullCentresCourse.getInt(1));
-                System.out.print(" ");
-                System.out.print(fullCentresCourse.getString(2));
-                System.out.println();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        }
 
-            System.out.println("------------------ Close ------------------");
-            while (true) {
-                try {
-                    if (!closeCentresCourse.next()) {
-                        break;
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    System.out.print(closeCentresCourse.getInt(1));
-                    System.out.print(" ");
-                    System.out.print(closeCentresCourse.getString(2));
-                    System.out.println();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
+//        System.out.println("------------------ Close Centres ------------------");
+//        while (true) {
+//            try {
+//                if (!closeCentresCourse.next()) {
+//                    break;
+//                }
+//                System.out.print(closeCentresCourse.getString(2) + ": " +
+//                        closeCentresCourse.getInt(1) + "\n"
+//                );
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
-            System.out.println(traineesCourse);
-            System.out.println(traineesCourseWaiting);
+        System.out.println("------------------ Trainees in Training ------------------");
+        for(String courseType : traineesCourse.keySet())
+        {
+            System.out.println(courseType + ": " + traineesCourse.get(courseType));
+        }
+        System.out.println("------------------ Trainees Waiting ------------------");
+        for(String courseType : traineesWaitingCourse.keySet())
+        {
+            System.out.println(courseType + ": " + traineesWaitingCourse.get(courseType));
         }
     }
 
@@ -162,7 +154,3 @@ public class DisplayManager {
         logger.error(e);
     }
 }
-//            System.out.println(String.format(String.format(Message.CENTRES_OPEN.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t > 0))) + "\n" +
-//                    String.format(Message.FULL_CENTRES.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t == 0)) + "\n" +
-//                    String.format(Message.TRAINEES_TRAINING.message, traineeDao.getTrainingTrainees().length) + "\n" +
-//                    String.format(Message.TRAINEES_WAITING.message, traineeDao.getWaitingTrainees(false).length)

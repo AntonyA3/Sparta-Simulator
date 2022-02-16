@@ -579,7 +579,6 @@ public class TraineeDAO {
         }
     }
 
-
     public ResultSet getOpenCentresByCourse(){
         Statement statement = null;
         ResultSet rs = null;
