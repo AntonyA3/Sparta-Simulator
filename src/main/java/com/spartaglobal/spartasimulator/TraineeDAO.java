@@ -81,33 +81,42 @@ public class TraineeDAO {
 
 
             //Create Training Centre Table
-            String sql = "CREATE TABLE training_centres " +
-                    "(centre_id int, capacity int, open bit, " +
-                    "PRIMARY KEY (centre_id))";
-
+            String sql = """
+                CREATE TABLE training_centres(
+                    centre_id INT, 
+                    catagory VARCHAR(50),
+                    capacity INT, 
+                    open BIT,
+                    months_below_threshold INT,
+                    PRIMARY KEY (centre_id)
+                )    
+            """;
             statement.executeUpdate(sql);
 
             //Create Clients Table
             sql = """
                 CREATE TABLE clients(
-                client_id int,
-                required_course VARCHAR(50),
-                required_trainees int,
-                happy bit,
-                PRIMARY KEY (client_id))
+                    client_id INT,
+                    client_state VARCHAR(50),
+                    course_requirement VARCHAR(50),
+                    requirement_start_month INT,
+                    trainees_required INT,
+                    PRIMARY KEY (client_id)
+                )
             """;
             statement.executeUpdate(sql);
 
             //Create Trainees Table
             sql = """
                     CREATE TABLE trainees (
-                    trainee_id int, 
-                    centre_id int,
-                    client_id int,
-                    course VARCHAR(50),
-                    training_state VARCHAR(10),
-                    PRIMARY KEY (trainee_id),
-                    FOREIGN KEY (centre_id) REFERENCES training_centres(centre_id));
+                        trainee_id INT, 
+                        centre_id int,
+                        client_id int,
+                        course VARCHAR(50),
+                        training_state VARCHAR(50),
+                        PRIMARY KEY (trainee_id),
+                        FOREIGN KEY (centre_id) REFERENCES training_centres(centre_id)
+                    );
             """;
             statement.executeUpdate(sql);
             statement.close();
@@ -233,36 +242,28 @@ public class TraineeDAO {
 
 
     public void addTrainee(int traineeId){
-
-        PreparedStatement preparedStatement = null;
-        try {
-            preparedStatement = connection.prepareStatement("" +
-                    "INSERT INTO trainees (trainee_id, course ,centre_id)" +
-                    "VALUES (?, null, null)"
-            );
-            preparedStatement.setInt(1, traineeId);
-            preparedStatement.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Trainee t = new Trainee(traineeId);
+        t.setCourse(null);
+        t.setCentreId(null);
+        t.setClientId(null);
+        t.setTrainingState("WAITING");
+        addTrainee(t);
     }
-
 
     public void addTrainee(Trainee t) {
         if (t == null) return;
-
+        String sql = """
+            INSERT INTO trainees (trainee_id, centre_id ,client_id, course, training_state)
+            VALUES (?, ?, ?, ?, ?);           
+        """;
         PreparedStatement preparedStatement = null;
         try {
 
-            preparedStatement = connection.prepareStatement("" +
-                    "INSERT INTO trainees (trainee_id, centre_id, course, client_id, training_state)" +
-                    "VALUES (?, ?, ?, ?, ?)"
-            );
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, t.getTraineeID());
             preparedStatement.setObject(2, t.getCentreId());
-            preparedStatement.setString(3, t.getTraineeCourse());
-            preparedStatement.setObject(4, t.getClientId());
+            preparedStatement.setObject(3, t.getClientId());
+            preparedStatement.setString(4, t.getTraineeCourse());
             preparedStatement.setString(5, t.getTrainingState());
             preparedStatement.executeUpdate();
 
@@ -273,19 +274,19 @@ public class TraineeDAO {
 
     public void addTrainingCentre(TrainingCentre t){
         if (t == null) return;
-
-        PreparedStatement preparedStatement = null;
+        String sql = """
+            INSERT INTO training_centres(centre_id, catagory, capacity, open, months_below_threshold)
+            VALUES (?, ?, ?, ?, ?)
+        """;
         try {
-            preparedStatement = connection.prepareStatement("" +
-                    "INSERT INTO training_centres(centre_id, capacity)" +
-                    "VALUES (?, ?)"
-            );
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, t.getTrainingCentreID());
-            preparedStatement.setInt(2, t.getTrainingCentreCapacity());
-            int changed = preparedStatement.executeUpdate();
-            //Main.logger.info ("rows affected: "  +changed );
-
-        } catch (SQLException e) {
+            preparedStatement.setString(2, t.getTrainingCentreCatagory());
+            preparedStatement.setInt(3, t.getTrainingCentreCapacity());
+            preparedStatement.setBoolean(4, t.getTrainingCentreOpen());
+            preparedStatement.setInt(5, t.getMonthsBelowThreshold());
+            preparedStatement.executeUpdate();
+        }catch (SQLException e){
             e.printStackTrace();
         }
     }
@@ -722,44 +723,79 @@ public class TraineeDAO {
         return result;
     }
 
-    public void assignTraineeToValidClient(Trainee t){
-
-        //Find First Valid Client
-        String sql = """
-                
-                """
-        String sql = """
-                UPDATE trainees t
-                SET t.client_id
-                WHERE 
-                """;
-    }
-
-    public void addTraineedOrSetToWaiting(int traineeId, String traineeCourse){
-//        if (t == null) return;
-//
-//        PreparedStatement preparedStatement = null;
+//    public void assignTraineeToValidClient(int traineeId){
+//        //Find First Valid Client
 //        try {
-//            int[] ids = getIdsOfNoneFullTrainingCentres();
-//            Random random = new Random();
+//            Statement statement = connection.createStatement();
+//            String sql = """
+//                        DROP VIEW IF EXISTS c.course_requirement;
+//                    """;
+//            statement.executeUpdate(sql);
+//            sql = """
+//                        CREATE VIEW course_requirement AS
+//                        SELECT c.client_id, c.course_requirement, c.client_state, COUNT(trainee_id) AS trainee_count
+//                        FROM clients c
+//                        INNER JOIN trainees t
+//                        ON c.course_requirements = t.course
+//                        GROUP BY c.client_id, c.course_requirement, c.client_state
+//                        HAVING t.training_state = 'TRAINING';
+//                    """;
+//            statement.executeUpdate(sql);
 //
-//            Integer chosenCentre = null;
-//            if(ids.length > 0) {
-//                chosenCentre = ids[random.nextInt(ids.length)];
+//            sql = """
+//
+//                        SELECT c.client_id
+//                        FROM clients_with_trainee_count c
+//                        INNER JOIN trainees t
+//                        ON t.course = c.course_requirement
+//                        WHERE c.trainees_required > c.trainee_count AND
+//                        c.client_state = "WAITING"
+//                        ORDER BY requirement_start_month
+//                    """;
+//             ResultSet rs = statement.executeQuery(sql);
+//             int clientInt = -1;
+//             while (rs.next()){
+//                 clientInt = rs.getInt("client_id");
+//                 break;
+//             }
+//
+//            if(clientInt != -1){
+//
 //            }
-//            preparedStatement = connection.prepareStatement("" +
-//                    "INSERT INTO trainees (trainee_id, centre_id, course, training_state)" +
-//                    "VALUES (?, ?, ?, ?)"
-//            );
-//            preparedStatement.setInt(1, t.getTraineeID());
-//            preparedStatement.setObject(2, chosenCentre);
-//            preparedStatement.setString(3, t.getTraineeCourse());
-//            preparedStatement.setString(4,(chosenCentre == null) ? "WAITING" : "TRAINING");
-//            preparedStatement.executeUpdate();
+//            sql = """
+//                        DROP VIEW clients_with_trainee_count;
+//                    """;
+//            statement.executeUpdate(sql);
 //
-//        } catch (SQLException e) {
+//            statement.close();
+//        }catch (SQLException e){
 //            e.printStackTrace();
 //        }
+//
+//    }
+//
+    public void assignTraineeToValidClient(Trainee t){
+        assignTraineeToValidClient(t.getTraineeID());
+
+    }
+
+    public void addTraineedOrSetToWaiting(Trainee t){
+        if (t == null) return;
+        
+        int[] ids = getIdsOfNoneFullTrainingCentres();
+        Random random = new Random();
+
+        Integer chosenCentre = null;
+        if(ids.length > 0) {
+            chosenCentre = ids[random.nextInt(ids.length)];
+        }
+        Trainee newTrainee = new Trainee(t.getTraineeID());
+        newTrainee.setCentreId(chosenCentre);
+        newTrainee.setClientId(null);
+        newTrainee.setCourse(t.getTraineeCourse());
+        newTrainee.setTrainingState((chosenCentre == null) ? "WAITING" : "TRAINING");
+        addTrainee(newTrainee);
+
     }
 
 
