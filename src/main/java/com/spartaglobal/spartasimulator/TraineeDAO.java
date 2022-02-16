@@ -82,6 +82,10 @@ public class TraineeDAO {
 
     }
 
+    public Connection getConnection(){
+        return this.connection;
+    }
+
     public int getOpenTrainingCentreCount() {
         Statement statement = null;
         try {
