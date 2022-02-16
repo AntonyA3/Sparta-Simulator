@@ -17,7 +17,6 @@ public class TraineeDAOTest {
     public static void setUp(){
         tDAO = new TraineeDAO();
         tDAO.openConnection();
-
     }
 
     @AfterAll
@@ -27,14 +26,14 @@ public class TraineeDAOTest {
 
     @Test
     @DisplayName("Given creating a database table, createTable, should not throw an exception")
-    public void givenCreatingATable_createTable_DoesNotThrowException(){
+    public void givenCreatingATable_createTable_DoesNotThrowException(){    // Done
         assertDoesNotThrow(() -> tDAO.createTables());
     }
 
     @Test
     @DisplayName("Given adding a trainee in the table, addTrainee, should add the trainee in the database")
-    public void givenAddingTree_addTrainee_AddsTheTraineeInDatabase() throws SQLException {
-        boolean exists = false;
+    public void givenAddingTree_addTrainee_AddsTheTraineeInDatabase() throws SQLException {    // Done
+        boolean doesExists = false;
         Trainee trainee = new Trainee(48);
 
         Statement st = tDAO.getConnection().createStatement();
@@ -46,18 +45,42 @@ public class TraineeDAOTest {
             int traineeId = rs.getInt("trainee_id");
             Integer centreId = rs.getInt("centre_id");
             String courseName = rs.getString("course");
-            if (traineeId == 48 && centreId == 0 && courseName == null) exists = true;
+            if (traineeId == 48 && centreId == 0 && courseName == null) doesExists = true;
         }
         st.close();
-        assertTrue(exists);
+        assertTrue(doesExists);
     }
 
     @Test
     @DisplayName("Given adding a training centre, addTrainingCentre, should not throw an exception")
-    public void givenAddingTrainingCentre_addTrainingCentre_DoesNotThrowException(){
-        TrainingHub trainingCentre = new TrainingHub(100);
-        assertDoesNotThrow(() -> tDAO.addTrainingCentre(trainingCentre));
+    public void givenAddingTrainingCentre_addTrainingCentre_DoesNotThrowException() throws SQLException {    // Done
+        boolean doesExists = false;
+        TrainingHub trainingCentre = new TrainingHub(15);
+
+        Statement st = tDAO.getConnection().createStatement();
+        tDAO.createTables();
+        tDAO.addTrainingCentre(trainingCentre);
+
+        ResultSet rs = st.executeQuery("SELECT * FROM `training_centres`");
+        while (rs.next()){
+            int centreId = rs.getInt("centre_id");
+            int capacity = rs.getInt("capacity");
+            if (centreId == 15 && capacity == 100) doesExists = true;
+        }
+
+        st.close();
+        assertTrue(doesExists);
     }
+
+    // TODO
+    /*@Test
+    @DisplayName("selectTraineesIdsInCentresWithLowOccupancyTest")
+    public void selectTraineesIdsInCentresWithLowOccupancy(){
+        tDAO.createTables();
+        tDAO.createTrainingCentreWithOccupancyView();
+        tDAO.addTrainee(8);
+        tDAO.selectTraineesIdsInCentresWithLowOccupancy(15);
+    }*/
 
     @Test
     @DisplayName("Given getting the centre capacities, getCentreCapacities, should not throw an exception")
@@ -110,6 +133,7 @@ public class TraineeDAOTest {
     @Test
     @DisplayName("Given moving trainee to a different centre, moveTraineeToCentre, should not throw an exception")
     public void givenMovingTraineeToDifferentCentre_moveTraineeToCentre_DoesNotThrowException(){
+        tDAO.addTrainee(7);
         assertDoesNotThrow(() -> tDAO.moveTraineeToCentre(7, 15));
     }
 
