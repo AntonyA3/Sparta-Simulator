@@ -54,6 +54,53 @@ public class TraineeDAO {
 
     }
 
+    public void createTables() {
+        Statement statement  = null;
+        try {
+            statement = this.connection.createStatement();
+            statement.executeUpdate("DROP TABLE IF EXISTS trainees;");
+            statement.executeUpdate("DROP TABLE IF EXISTS training_centres;");
+            statement.executeUpdate("DROP TABLE IF EXISTS clients;");
+
+
+            String sql = "CREATE TABLE training_centres " +
+                    "(centre_id int, capacity int, open bit, " +
+                    "PRIMARY KEY (centre_id))";
+
+            statement.executeUpdate(sql);
+
+
+
+            sql = """
+                CREATE TABLE clients(
+                client_id int,
+                required_course VARCHAR(50),
+                required_trainees int,
+                happy bit,
+                PRIMARY KEY (client_id))
+            """;
+
+            statement.executeUpdate(sql);
+
+
+            sql = """
+                    CREATE TABLE trainees (
+                    trainee_id int, 
+                    centre_id int,
+                    client_id int,
+                    course VARCHAR(50),
+                    training_state VARCHAR(10),
+                    PRIMARY KEY (trainee_id),
+                    FOREIGN KEY (centre_id) REFERENCES training_centres(centre_id));
+            """;
+            statement.executeUpdate(sql);
+            statement.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public int[] getIdOfTraineesInFullCentres(){
 
         createTrainingCentreWithOccupancyView();
@@ -181,51 +228,7 @@ public class TraineeDAO {
         }
     }
 
-    public void createTables() {
-        Statement statement  = null;
-        try {
-            statement = this.connection.createStatement();
-            statement.executeUpdate("DROP TABLE IF EXISTS trainees;");
-            statement.executeUpdate("DROP TABLE IF EXISTS training_centres;");
-            statement.executeUpdate("DROP TABLE IF EXISTS clients;");
 
-
-            String sql = "CREATE TABLE training_centres " +
-                    "(centre_id int, capacity int, open bit, " +
-                    "PRIMARY KEY (centre_id))";
-
-            statement.executeUpdate(sql);
-
-            sql = """
-                    CREATE TABLE trainees (
-                    trainee_id int, 
-                    centre_id int,
-                    client_id int,
-                    course VARCHAR(50),
-                    training_state VARCHAR(10),
-                    PRIMARY KEY (trainee_id),
-                    FOREIGN KEY (centre_id) REFERENCES training_centres(centre_id));
-            """;
-            statement.executeUpdate(sql);
-
-            sql = """
-                CREATE TABLE clients(
-                client_id int,
-                required_course VARCHAR(50),
-                required_trainees int,
-                happy bit,
-                PRIMARY KEY (client_id))
-            """;
-
-            statement.executeUpdate(sql);
-
-
-            statement.close();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     public void addTrainee(int traineeId){
 
