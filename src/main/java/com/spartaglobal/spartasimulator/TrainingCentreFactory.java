@@ -21,5 +21,5 @@ public class TrainingCentreFactory {
     }
 
     public TrainingCentre makeCentre() { return makeCentre(CENTRE_TYPES[rand.nextInt(CENTRE_TYPES.length)]); }
-    
+
 }
