@@ -1,12 +1,10 @@
 package com.spartaglobal.spartasimulator;
 
+import javax.xml.transform.Result;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Properties;
-import java.util.Random;
+import java.util.*;
 
 public class TraineeDAO {
     private Connection connection = null;
@@ -32,6 +30,7 @@ public class TraineeDAO {
             tdao.updateTraineesTrainingCentre(i, 15);
         }
         tdao.updateTraineesTrainingCentre(25, 12);
+
         System.out.println(tdao.getWaitingTrainees(false).length);
         tdao.removeTraineesFromWaitingList();
         System.out.println("Waiting trainees " + tdao.getWaitingTrainees(false).length);
@@ -380,9 +379,7 @@ public class TraineeDAO {
         Statement statement = null;
         try {
             statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT capacity, COUNT() FROM training_centres, ;");
-
-
+            ResultSet rs = statement.executeQuery("SELECT centre_id, capacity FROM training_centres GROUP BY centre_id;");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -390,8 +387,6 @@ public class TraineeDAO {
 
         return new int[0];
     }
-
-
 
     public Trainee[] getTrainingTrainees() {
         Statement statement  = null;
@@ -549,5 +544,51 @@ public class TraineeDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public ResultSet getOpenCentresByCourse(){
+        Statement statement = null;
+        ResultSet rs = null;
+        try {
+            statement = this.connection.createStatement();
+            rs = statement.executeQuery("SELECT COUNT(DISTINCT(training_centres.centre_id)) AS `Total Centres`, course"+
+                    " FROM trainees JOIN training_centres ON trainees.centre_id = training_centres.centre_id" +
+                    " WHERE training_centres.capacity > 0 GROUP BY course;");
+            return rs;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        return rs;
+    }
+
+    public ResultSet getFullCentresByCourse(){
+        Statement statement = null;
+        ResultSet rs = null;
+        try {
+            statement = this.connection.createStatement();
+            rs = statement.executeQuery("SELECT COUNT(DISTINCT(training_centres.centre_id)) AS `Total Centres`, course"+
+                    " FROM trainees JOIN training_centres ON trainees.centre_id = training_centres.centre_id" +
+                    " WHERE training_centres.capacity = 0 GROUP BY course;");
+            return rs;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rs;
+    }
+
+    public ResultSet getCloseCentresByCourse(){
+        Statement statement = null;
+        ResultSet rs = null;
+        try {
+            statement = this.connection.createStatement();
+            rs = statement.executeQuery("SELECT COUNT(DISTINCT(training_centres.centre_id)) AS `Total Centres`, course"+
+                    " FROM trainees JOIN training_centres ON trainees.centre_id = training_centres.centre_id" +
+                    " WHERE training_centres.isOpen = false GROUP BY course;");
+            return rs;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rs;
     }
 }

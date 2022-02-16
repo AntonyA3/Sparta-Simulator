@@ -3,15 +3,18 @@ package com.spartaglobal.spartasimulator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.xml.transform.Result;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 public class DisplayManager {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         TraineeDAO tdao = new TraineeDAO();
         tdao.openConnection();
         tdao.createTables();
         TraineeFactory traineesF = new TraineeFactory();
-        Trainee[] trainees = traineesF.getNewTrainees(20, 100);
+        Trainee[] trainees = traineesF.getNewTrainees(20, 30);
         tdao.addTrainingCentre(new TrainingHub(1));
         tdao.addTrainingCentre( new TrainingHub(2));
         tdao.addTrainingCentre( new TrainingHub(3));
@@ -32,7 +35,7 @@ public class DisplayManager {
 
     public enum Message{
         SIMULATION_START("Simulation starting."),
-        MONTHS("Please, enter the simulation length in months: "),
+        MONTHS("Please, enter the simulation length in months (Min. 1 - Max. 120): "),
         INFO_GIVEN_MONTHLY("Would you like the simulation to print information monthly (M), or only after the simulation ends (S)?"),
         INVALID_INPUT("Invalid input."),
         INVALID_INPUT_MONTHS("Invalid input. " + MONTHS.message),
@@ -67,9 +70,10 @@ public class DisplayManager {
     public static void printSystemInfo(TraineeDAO traineeDao){
         Map<String,Integer> traineesCourse = new HashMap<>();
         Map<String,Integer> traineesCourseWaiting = new HashMap<>();
-        Map<String,Integer> centersCourse = new HashMap<>();
-        int[] NoneFullCentres = traineeDao.getIdsOfNoneFullTrainingCentres();
-        int[] fullCentres = traineeDao.getIdOfTraineesInFullCentres();
+        ResultSet openCentresCourse = traineeDao.getOpenCentresByCourse();
+        ResultSet fullCentresCourse = traineeDao.getFullCentresByCourse();
+        ResultSet closeCentresCourse = traineeDao.getCloseCentresByCourse();
+
         String traineeCourse;
 
         for (Trainee trainee : traineeDao.getTrainingTrainees())
@@ -92,21 +96,66 @@ public class DisplayManager {
             }
         }
 
+        System.out.println("------------------ Open ------------------");
 
+        while (true) {
+            try {
+                if (!openCentresCourse.next()) {
+                    break;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                System.out.print(openCentresCourse.getInt(1));
+                System.out.print(" ");
+                System.out.print(openCentresCourse.getString(2));
+                System.out.println();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
 
-        System.out.println(traineesCourse);
-        System.out.println(traineesCourseWaiting);
+        System.out.println("------------------ Full ------------------");
+        while (true) {
+            try {
+                if (!fullCentresCourse.next()) {
+                    break;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                System.out.print(fullCentresCourse.getInt(1));
+                System.out.print(" ");
+                System.out.print(fullCentresCourse.getString(2));
+                System.out.println();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
 
-//        // SELECT training_course, COUNT(*) FROM training_centres GROUP BY (training_course);
-//        System.out.println(String.format(Message.CENTRES_OPEN.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t > 0)) + "\n" +
-//                "MISSING CLOSED CENTRE\n" +
-//                // SELECT training_course, COUNT(*) FROM training_centres GROUP BY (training_course);
-//                String.format(Message.FULL_CENTRES.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t == 0)) + "\n" +
-//                // SELECT training_course, COUNT(*) FROM trainees_training_centres GROUP BY training_course;
-//                String.format(Message.TRAINEES_TRAINING.message, traineeDao.getTrainingTraineesCount() + "\n"
-//                // SELECT training_course, COUNT(*) FROM trainees_training_centres GROUP BY training_course;
-////                String.format(Message.TRAINEES_WAITING.message, traineeDao.getWaitingTrainees(false).length)
-//        ));
+            System.out.println("------------------ Close ------------------");
+            while (true) {
+                try {
+                    if (!closeCentresCourse.next()) {
+                        break;
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    System.out.print(closeCentresCourse.getInt(1));
+                    System.out.print(" ");
+                    System.out.print(closeCentresCourse.getString(2));
+                    System.out.println();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            System.out.println(traineesCourse);
+            System.out.println(traineesCourseWaiting);
+        }
     }
 
     public static void printException(Exception e){
