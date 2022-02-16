@@ -185,6 +185,8 @@ public class TraineeDAO {
             statement = this.connection.createStatement();
             statement.executeUpdate("DROP TABLE IF EXISTS trainees;");
             statement.executeUpdate("DROP TABLE IF EXISTS training_centres;");
+            statement.executeUpdate("DROP TABLE IF EXISTS clients;");
+
 
             String sql = "CREATE TABLE training_centres " +
                     "(centre_id int, capacity int, open bit, " +
