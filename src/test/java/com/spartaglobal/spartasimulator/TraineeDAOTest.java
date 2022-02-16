@@ -2,7 +2,12 @@ package com.spartaglobal.spartasimulator;
 
 import org.junit.jupiter.api.*;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import static org.junit.jupiter.api.Assertions.*;
+
 
 public class TraineeDAOTest {
 
@@ -12,6 +17,7 @@ public class TraineeDAOTest {
     public static void setUp(){
         tDAO = new TraineeDAO();
         tDAO.openConnection();
+
     }
 
     @AfterAll
@@ -26,10 +32,24 @@ public class TraineeDAOTest {
     }
 
     @Test
-    @DisplayName("Given adding a trainee in the table, addTrainee, should not throw an exception")
-    public void givenAddingTree_addTrainee_DoesNotThrowException(){
+    @DisplayName("Given adding a trainee in the table, addTrainee, should add the trainee in the database")
+    public void givenAddingTree_addTrainee_AddsTheTraineeInDatabase() throws SQLException {
+        boolean exists = false;
         Trainee trainee = new Trainee(48);
-        assertDoesNotThrow(() -> tDAO.addTrainee(trainee));
+
+        Statement st = tDAO.getConnection().createStatement();
+        tDAO.createTables();
+        tDAO.addTrainee(trainee);
+
+        ResultSet rs = st.executeQuery("SELECT * FROM trainees");
+        while (rs.next()){
+            int traineeId = rs.getInt("trainee_id");
+            Integer centreId = rs.getInt("centre_id");
+            String courseName = rs.getString("course");
+            if (traineeId == 48 && centreId == 0 && courseName == null) exists = true;
+        }
+        st.close();
+        assertTrue(exists);
     }
 
     @Test
