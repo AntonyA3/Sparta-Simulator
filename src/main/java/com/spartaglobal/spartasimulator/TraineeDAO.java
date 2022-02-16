@@ -244,32 +244,6 @@ public class TraineeDAO {
         }
     }
 
-    public void addTraineedOrSetToWaiting(Trainee t){
-        if (t == null) return;
-
-        PreparedStatement preparedStatement = null;
-        try {
-            int[] ids = getIdsOfNoneFullTrainingCentres();
-            Random random = new Random();
-
-            Integer chosenCentre = null;
-            if(ids.length > 0) {
-                chosenCentre = ids[random.nextInt(ids.length)];
-            }
-            preparedStatement = connection.prepareStatement("" +
-                    "INSERT INTO trainees (trainee_id, centre_id, course, training_state)" +
-                    "VALUES (?, ?, ?, ?)"
-            );
-            preparedStatement.setInt(1, t.getTraineeID());
-            preparedStatement.setObject(2, chosenCentre);
-            preparedStatement.setString(3, t.getTraineeCourse());
-            preparedStatement.setString(4,(chosenCentre == null) ? "WAITING" : "TRAINING");
-            preparedStatement.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     public void addTrainee(Trainee t) {
         if (t == null) return;
@@ -645,4 +619,153 @@ public class TraineeDAO {
             e.printStackTrace();
         }
     }
+
+
+    //New Methods
+
+    public void createANewTrainingCentre(TrainingCentre t){
+        String sql = """
+                INSERT INTO training_centres
+                (centre_id, capacity, open, under_threshold)
+                VALUES(?, ?, true, 0);
+                """;
+    }
+
+    public void incrementMonthOfTrainingTrainees(){
+        String sql = """
+                UPDATE trainees
+                SET months_training = months_training + 1;
+                WHERE training_state = 'TRAINING';
+                """;
+        try{
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(sql);
+            statement.close();
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void benchTraineesTrainingForOverAYear(){
+        String sql = """
+                UPDATE trainees
+                SET training_state = 'BENCHED'
+                WHERE months_training >= 12;
+                """;
+        try{
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(sql);
+            statement.close();
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    public int[] getIdsOfBenchedTrainees(){
+        String sql = """
+                   SELECT trainee_id 
+                   FROM trainees
+                   WHERE training_state = 'BENCHED'; 
+                """;
+        int[] result = new int[0];
+        ResultSet rs = null;
+        try{
+            Statement statement = connection.createStatement();
+            rs = statement.executeQuery(sql);
+            statement.close();
+            ArrayList<Integer> intArrayList = new ArrayList<>();
+            while (rs.next()){
+                intArrayList.add(rs.getInt("trainee_id"));
+            }
+            int[] intArray = new int[intArrayList.size()];
+            for (int i = 0; i < intArrayList.size(); i++) {
+                intArray[i] = intArrayList.get(i);
+            }
+            result = intArray;
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+
+
+    public int[] getWaitingClientsOrderedByWaitTime(){
+        String sql = """
+            SELECT client_id
+            FROM clients
+            WHERE client_state = 'WAITING'
+            ORDER BY wait_time DESC;        
+        """;
+        int[] result = new int[0];
+        ResultSet rs = null;
+        try{
+            Statement statement = connection.createStatement();
+            rs = statement.executeQuery(sql);
+            statement.close();
+            ArrayList<Integer> intArrayList = new ArrayList<>();
+            while (rs.next()){
+                intArrayList.add(rs.getInt("client_id"));
+            }
+            int[] intArray = new int[intArrayList.size()];
+            for (int i = 0; i < intArrayList.size(); i++) {
+                intArray[i] = intArrayList.get(i);
+            }
+            result = intArray;
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public void assignTraineeToValidClient(Trainee t){
+
+        //Find First Valid Client
+        String sql = """
+                
+                """
+        String sql = """
+                UPDATE trainees t
+                SET t.client_id
+                WHERE 
+                """;
+    }
+
+    public void addTraineedOrSetToWaiting(int traineeId, String traineeCourse){
+//        if (t == null) return;
+//
+//        PreparedStatement preparedStatement = null;
+//        try {
+//            int[] ids = getIdsOfNoneFullTrainingCentres();
+//            Random random = new Random();
+//
+//            Integer chosenCentre = null;
+//            if(ids.length > 0) {
+//                chosenCentre = ids[random.nextInt(ids.length)];
+//            }
+//            preparedStatement = connection.prepareStatement("" +
+//                    "INSERT INTO trainees (trainee_id, centre_id, course, training_state)" +
+//                    "VALUES (?, ?, ?, ?)"
+//            );
+//            preparedStatement.setInt(1, t.getTraineeID());
+//            preparedStatement.setObject(2, chosenCentre);
+//            preparedStatement.setString(3, t.getTraineeCourse());
+//            preparedStatement.setString(4,(chosenCentre == null) ? "WAITING" : "TRAINING");
+//            preparedStatement.executeUpdate();
+//
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+    }
+
+
+
+
+
+
+
+
+
+
+
 }
