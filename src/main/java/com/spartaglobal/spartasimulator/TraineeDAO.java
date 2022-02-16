@@ -50,6 +50,10 @@ public class TraineeDAO {
         tdao.closeConnection();
     }
 
+    public TraineeDAO(){
+
+    }
+
     public int[] getIdOfTraineesInFullCentres(){
 
         createTrainingCentreWithOccupancyView();
@@ -149,9 +153,7 @@ public class TraineeDAO {
         return 0;
     }
 
-    public TraineeDAO(){
 
-    }
 
     public void openConnection(){
 
@@ -200,6 +202,7 @@ public class TraineeDAO {
                     centre_id int,
                     client_id int,
                     course VARCHAR(50),
+                    training_state VARCHAR(10),
                     PRIMARY KEY (trainee_id),
                     FOREIGN KEY (centre_id) REFERENCES training_centres(centre_id));
             """;
@@ -233,7 +236,6 @@ public class TraineeDAO {
                     "VALUES (?, null, null)"
             );
             preparedStatement.setInt(1, traineeId);
-
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
@@ -254,12 +256,13 @@ public class TraineeDAO {
                 chosenCentre = ids[random.nextInt(ids.length)];
             }
             preparedStatement = connection.prepareStatement("" +
-                    "INSERT INTO trainees (trainee_id, centre_id, course)" +
-                    "VALUES (?, ?, ?)"
+                    "INSERT INTO trainees (trainee_id, centre_id, course, training_state)" +
+                    "VALUES (?, ?, ?, ?)"
             );
             preparedStatement.setInt(1, t.getTraineeID());
             preparedStatement.setObject(2, chosenCentre);
             preparedStatement.setString(3, t.getTraineeCourse());
+            preparedStatement.setString(4,(chosenCentre == null) ? "WAITING" : "TRAINING");
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
@@ -274,11 +277,14 @@ public class TraineeDAO {
         try {
 
             preparedStatement = connection.prepareStatement("" +
-                    "INSERT INTO trainees (trainee_id, centre_id)" +
-                    "VALUES (?, ?)"
+                    "INSERT INTO trainees (trainee_id, centre_id, course, client_id, training_state)" +
+                    "VALUES (?, ?, ?, ?, ?)"
             );
             preparedStatement.setInt(1, t.getTraineeID());
             preparedStatement.setObject(2, t.getCentreId());
+            preparedStatement.setString(3, t.getTraineeCourse());
+            preparedStatement.setObject(4, t.getClientId());
+            preparedStatement.setString(5, t.getTrainingState());
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
