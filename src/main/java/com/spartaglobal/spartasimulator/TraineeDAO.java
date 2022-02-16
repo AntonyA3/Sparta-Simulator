@@ -11,6 +11,7 @@ import java.util.Random;
 public class TraineeDAO {
     private Connection connection = null;
     private static int centreId = 0;
+
     //Training DAO Demo
     public static void main(String[] args) {
         TraineeDAO tdao = new TraineeDAO();
@@ -50,25 +51,17 @@ public class TraineeDAO {
     }
 
     public int[] getIdOfTraineesInFullCentres(){
-         Statement statement = null;
+
+        createTrainingCentreWithOccupancyView();
         try {
-            statement = connection.createStatement();
-
-             String sql ="""
-                SELECT trainee_id 
-                FROM trainees
-                WHERE centre_id IN (
-                    SELECT centre_id FROM (
-                        SELECT tc.centre_id, tc.capacity, COUNT(t.trainee_id) AS occupancy
-                        FROM training_centres tc 
-                        INNER JOIN trainees t 
-                        ON t.centre_id = tc.centre_id
-                        GROUP BY tc.centre_id, tc.capacity
-                        HAVING COUNT(t.trainee_id) = tc.capacity
-                    )fc
-                );
+            Statement statement = connection.createStatement();
+            String sql ="""
+                    SELECT trainee_id 
+                    FROM training_centres_with_occupancy tcwo
+                    INNER JOIN trainees t
+                    ON tcwo.centre_id = t.centre_id
+                    WHERE tcwo.occupancy = tcwo.capacity
                 """;
-
             ResultSet rs = statement.executeQuery(sql);
             ArrayList<Integer> intArrayList = new ArrayList<>();
             while (rs.next()){
@@ -83,6 +76,7 @@ public class TraineeDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        dropTrainingCentresWithOccupancyView();
 
         return new int[0];
 
@@ -202,11 +196,24 @@ public class TraineeDAO {
                     CREATE TABLE trainees (
                     trainee_id int, 
                     centre_id int,
+                    client_id int,
                     course VARCHAR(50),
                     PRIMARY KEY (trainee_id),
                     FOREIGN KEY (centre_id) REFERENCES training_centres(centre_id));
             """;
             statement.executeUpdate(sql);
+
+            sql = """
+                CREATE TABLE clients(
+                client_id int,
+                required_course VARCHAR(50),
+                required_trainees int,
+                happy bit,
+                PRIMARY KEY (client_id))
+            """;
+
+            statement.executeUpdate(sql);
+
 
             statement.close();
 
@@ -419,35 +426,17 @@ public class TraineeDAO {
         return new Trainee[0];
     }
 
-
-
-    private String trainingCentreCapacityOccupancyQuery(){
-        return """
-                SELECT centre_id, capacity ,COUNT(*) AS occupancy FROM (
-                        SELECT tc.centre_id, tc.capacity, t.trainee_id 
-                        FROM training_centres tc 
-                        INNER JOIN trainees t
-                        ON t.centre_id = tc.centre_id
-                ) nt
-                GROUP BY centre_id
-                
-        """;
-    }
     public int[] getIdsOfNoneFullTrainingCentres(){
         Statement statement = null;
         try {
             statement = connection.createStatement();
+            createTrainingCentreWithOccupancyView();
             ResultSet rs = null;
-            String sql = String.format( """
-                   SELECT centre_id FROM (
-                        %s
-                     ) cid WHERE occupancy < capacity
-                    
-                    """, trainingCentreCapacityOccupancyQuery());
-            rs = statement.executeQuery(
-                    sql
-
-            );
+            String sql = """
+                   SELECT centre_id FROM training_centres_with_occupancy WHERE occupancy < capacity;
+                    """;
+            rs = statement.executeQuery(sql);
+            dropTrainingCentresWithOccupancyView();
 
             ArrayList<Integer> intArrayList = new ArrayList<Integer>();
             while (rs.next()){
@@ -516,22 +505,74 @@ public class TraineeDAO {
         }
     }
 
-    /**Currently Implementing**/
-    public void removeCentresWithOccupancyBelow(int minOccupancy){
-        PreparedStatement preparedStatement = null;
-        Statement statement = null;
+    public void addTraineeToRandomCentre(){
+
+    }
+
+    public void addTraineeToWaitingList(int traineeId){
         try {
+            String sql = """
+                UPDATE trainees
+                SET centre_id = NULL
+                WHERE trainee_id = ?;
+            """;
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, traineeId);
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
 
-            String sql =
-                """
-                   DROP VIEW IF EXISTS training_centres_with_occupancy;
-                """;
-            statement = connection.createStatement();
-            statement.executeUpdate(sql);
-            statement.close();
+    }
 
-            sql = String.format(
+    public void setRandomTrainingCentreForTheseTraineeIds(){
+
+    }
+
+    public int[] selectTraineesIdsInCentresWithLowOccupancy(int minOccupancy){
+        int[] result;
+        createTrainingCentreWithOccupancyView();
+        String sql = """
+               SELECT trainee_id
+               FROM trainees t
+               INNER JOIN training_centres_with_occupancy tcwo 
+               ON t.centre_id = tcwo.centre_id
+               WHERE tcwo.occupancy < ? 
+                
+         """;
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, minOccupancy);
+            ResultSet rs = preparedStatement.executeQuery();
+            ArrayList<Integer> resultsArrayList = new ArrayList<Integer>();
+            while (rs.next()){
+                resultsArrayList.add(rs.getInt("trainee_id"));
+            }
+            int[] resultsArray = new int[resultsArrayList.size()];
+            for (int i = 0; i < resultsArrayList.size(); i++) {
+                resultsArray[i] = resultsArrayList.get(i);
+            }
+            result = resultsArray;
+
+        }catch (SQLException e){
+            e.printStackTrace();
+            result = new int[0];
+        }
+        dropTrainingCentresWithOccupancyView();
+        return result;
+    }
+
+    private void createTrainingCentreWithOccupancyView(){
+        try {
+                Statement statement = connection.createStatement();
+
+                String sql =
                     """
+                       DROP VIEW IF EXISTS training_centres_with_occupancy;
+                    """;
+                statement = connection.createStatement();
+                statement.executeUpdate(sql);
+                statement.close();
+                sql = """
                       CREATE VIEW training_centres_with_occupancy AS
                       SELECT centre_id, capacity, COUNT(*) AS occupancy FROM (
                           SELECT tc.centre_id, tc.capacity, t.trainee_id
@@ -540,35 +581,53 @@ public class TraineeDAO {
                           ON t.centre_id = tc.centre_id
                       ) nt
                       GROUP BY centre_id;
-                  """
-            );
+                  """;
             statement = connection.createStatement();
             statement.executeUpdate(sql);
             statement.close();
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
 
-            sql = String.format("""
-                UPDATE training_centres
-                    INNER JOIN training_centres_with_occupancy 
-                    ON training_centres.centre_id = training_centres_with_occupancy.centre_id
-                SET training_centres.open = 0
-                WHERE training_centres_with_occupancy.occupancy < ?;
-            """, trainingCentreCapacityOccupancyQuery());
-            preparedStatement = this.connection.prepareStatement(sql);
+    private void closeTrainingCentresWithLowOccupancy(int minOccupancy){
+        try {
+            createTrainingCentreWithOccupancyView();
+            String sql = """
+                        UPDATE training_centres tc
+                            INNER JOIN training_centres_with_occupancy tcwo
+                            ON tc.centre_id = tcwo.centre_id
+                        SET tc.open = 0
+                        WHERE tcwo.occupancy < ?;
+                    """;
+            PreparedStatement preparedStatement = this.connection.prepareStatement(sql);
             preparedStatement.setInt(1, minOccupancy);
             preparedStatement.executeUpdate();
             preparedStatement.close();
 
-            statement = connection.createStatement();
-            sql = """
-            DROP VIEW training_centres_with_occupancy;
+            dropTrainingCentresWithOccupancyView();
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    private void dropTrainingCentresWithOccupancyView(){
+        try {
+            Statement statement = connection.createStatement();
+            String sql = """
+                DROP VIEW IF EXISTS training_centres_with_occupancy;
             """;
-            statement.executeUpdate(sql);
-
-
-        } catch (SQLException e) {
+        statement.executeUpdate(sql);
+        }catch (SQLException e){
             e.printStackTrace();
         }
 
+    }
+
+    public void removeCentresWithOccupancyBelow(int minOccupancy){
+        createTrainingCentreWithOccupancyView();
+        closeTrainingCentresWithLowOccupancy(minOccupancy);
+        dropTrainingCentresWithOccupancyView();
    }
 
     public void removeTraineesFromWaitingList() {
