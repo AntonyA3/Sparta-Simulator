@@ -278,7 +278,7 @@ public class TraineeDAO {
                     "VALUES (?, ?)"
             );
             preparedStatement.setInt(1, t.getTraineeID());
-            preparedStatement.setObject(2, t.getCentreId());
+            preparedStatement.setObject(2, t.getCentreID());
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
@@ -411,7 +411,7 @@ public class TraineeDAO {
             while (rs.next()){
                 int id = rs.getInt("trainee_id");
                 Trainee trainee = new Trainee(id);
-                trainee.setCentreId(rs.getInt("centre_id"));
+                trainee.setCentreID(rs.getInt("centre_id"));
                 trainee.setCourse(rs.getString("course"));
                 trainees.add(trainee);
                 trainees.add(new Trainee(id, Course.JAVA.name));

@@ -24,16 +24,26 @@ public class Simulation {
     private static void loop(int month, TraineeDAO tdao, TraineeFactory tf, TrainingCentreFactory tcf, ClientFactory cf){
         if((month % 2) == 1) {
             TrainingCentre centre = tcf.makeCentre();
-            tdao.addTrainingCentre(centre);
-            if(centre.getCentreType().equals("Boot Camp")) for(int i = 0; i < 2; i++) tdao.addTrainingCentre(tcf.makeCentre("Boot Camp"));
+            tdao.insertCentre(centre);
+            if(centre.getCentreType().equals("BOOTCAMP")) for(int i = 0; i < 2; i++) tdao.insertCentre(tcf.makeCentre("BOOTCAMP"));
         }
 
         // for all happy clients that have been waiting for over a year, create a new requirement
-        Arrays.stream(tdao.getHappyClients()).forEach(c -> tdao.addRequirement(c)).forEach(c -> tdao.setClientWaiting(c));
+        tdao.getClients().stream()
+                .filter(c -> (c.getState().equals("HAPPY") && ((month - c.getReqStartMonth) >= 12)))
+                .forEach(c -> tdao.insertRequirement(c))
+                .forEach(c -> c.setState("WAITING"))
+                .forEach(c -> c.setReqStartMonth())
+                .forEach(c -> tdao.insertClient(c));
 
-        if((month >= 12) && (rand.nextDouble() < CLIENT_CREATION_CHANCE)) tdao.addClient(cf.makeClient());
 
-        // trainees that have been training for a year become benched
+        if((month >= 12) && (rand.nextDouble() < CLIENT_CREATION_CHANCE)) tdao.insertClient(cf.makeClient(month));
+
+        // trainees that have been training for three months become benched
+        tdao.getTrainees().stream()
+                .filter(t -> (month - t.getTrainingStartMonth()) >= 3)
+                .forEach(t -> setTrainingState("BENCH"))
+                .forEach(t -> tdao.insertTrainee(t));
         Arrays.stream(tdao.getTraineesTrainingOverAYear()).forEach(t -> tdao.setTraineeBenched(t));
         // get benched trainees
         Trainee[] benchedTrainees = tdao.getBenchedTrainees();
@@ -54,7 +64,7 @@ public class Simulation {
         }
 
         Arrays.stream(tdao.getWaitingTrainees(true)).forEach(t -> tdao.addTrainee(t));
-        Arrays.stream(tf.getNewTrainees(MIN_GENERATED_TRAINEES, MAX_GENERATED_TRAINEES)).forEach(t -> tdao.addTrainee(t));
+        Arrays.stream(tf.getNewTrainees(month, MIN_GENERATED_TRAINEES, MAX_GENERATED_TRAINEES)).forEach(t -> tdao.addTrainee(t));
 
         // potentially close centres and redistribute trainees
         Arrays.stream(tdao.getLowAttendanceCentres()).forEach(tc -> tdao.closeCentre(tc));

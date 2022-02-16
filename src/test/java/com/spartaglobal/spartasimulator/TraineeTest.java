@@ -12,7 +12,7 @@ public class TraineeTest {
 
     @BeforeAll
     public static void setUp(){
-        trainee = new Trainee(12);
+        trainee = new Trainee(12, "Java");
     }
 
     @Test
@@ -24,7 +24,7 @@ public class TraineeTest {
     @Test
     @DisplayName("Given two trainees with a different traineeID, getTraineeID, should return different values")
     public void givenTwoTrainees_getTraineeID_ReturnsDifferentValues(){
-        Trainee testTrainee = new Trainee(53);
+        Trainee testTrainee = new Trainee(53, "Java");
         assertNotEquals(trainee.getTraineeID(), testTrainee.getTraineeID());
     }
 }

@@ -15,15 +15,15 @@ public class TraineeFactory {
         return nextID;
     }
 
-    public Trainee makeTrainee(){
-        Trainee trainee = new Trainee(nextID, Course.getRandomCourse());
+    public Trainee makeTrainee(int month){
+        Trainee trainee = new Trainee(nextID, Course.getRandomCourse(), month);
         nextID++;
         return trainee;
     }
 
-    public Trainee[] getNewTrainees(int min, int max){
+    public Trainee[] getNewTrainees(int month, int min, int max){
         Trainee[] trainees = new Trainee[(rand.nextInt(min, (max + 1)))];
-        for(int i = 0; i < trainees.length; i++) trainees[i] = makeTrainee();
+        for(int i = 0; i < trainees.length; i++) trainees[i] = makeTrainee(month);
         return trainees;
     }
 }

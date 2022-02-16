@@ -3,33 +3,37 @@ package com.spartaglobal.spartasimulator;
 public class Trainee {
 
     private int traineeID;
-    private Integer centreId;
     private String course;
+    private Integer centreID;
+    private Integer clientID;
+    private String trainingState;
+    private int trainingStartMonth;
 
-    public Trainee(int traineeID) {
-        this.traineeID = traineeID;
-        this.centreId = null;
+    public Trainee(int traineeID, String course, int trainingStartMonth) {
+        this(traineeID, course, null, null, "WAITING", trainingStartMonth);
     }
-    public Trainee(int traineeID, String course) {
+
+    public Trainee(int traineeID, String course, Integer centreID, Integer clientID, String trainingState, int trainingStartMonth) {
         this.traineeID = traineeID;
         this.course = course;
-        this.centreId = null;
+        this.centreID = centreID;
+        this.clientID = clientID;
+        this.trainingState = trainingState;
+        this.trainingStartMonth = trainingStartMonth;
     }
 
-    public int getTraineeID(){
-        return traineeID;
+    public int getTraineeID(){ return traineeID; }
+    public Integer getCentreID() {
+        return centreID;
     }
-    public Integer getCentreId() {
-        return centreId;
-    }
-
-    public void setCentreId(Integer centreId) {
-        this.centreId = centreId;
-    }
+    public String getTraineeCourse() { return course;}
+    public int getTrainingStartMonth() { return trainingStartMonth; }
 
     public void setCourse(String course) {
         this.course = course;
     }
-
-    public String getTraineeCourse() { return course;}
+    public void setCentreID(Integer centreID) {
+        this.centreID = centreID;
+    }
+    public void setTrainingState(String trainingState) { this.trainingState = trainingState; }
 }

@@ -11,8 +11,8 @@ public class ClientFactory {
 
     public ClientFactory() { nextID = STARTING_ID; }
 
-    public Client makeClient() {
-        Client client = new Client(nextID, rand.nextInt(MIN_REQ_QUANTITY, (MAX_REQ_QUANTITY + 1)), Course.getRandomCourse());
+    public Client makeClient(int reqStartMonth) {
+        Client client = new Client(nextID, "WAITING", Course.getRandomCourse(), reqStartMonth, rand.nextInt(MIN_REQ_QUANTITY, (MAX_REQ_QUANTITY + 1)));
         nextID++;
         return client;
     }
