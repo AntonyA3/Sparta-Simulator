@@ -53,6 +53,22 @@ public class TraineeDAO {
     public TraineeDAO(){
 
     }
+    public void openConnection(){
+
+        try {
+            if(this.connection == null) {
+                Properties props = new Properties();
+                props.load(new FileReader("mysql.properties"));
+                connection = DriverManager.getConnection(
+                        props.getProperty("dburl"),
+                        props.getProperty("dbuserid"),
+                        props.getProperty("dbpassword"));
+            }
+
+        } catch (IOException | SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void createTables() {
         Statement statement  = null;
@@ -63,14 +79,15 @@ public class TraineeDAO {
             statement.executeUpdate("DROP TABLE IF EXISTS clients;");
 
 
+
+            //Create Training Centre Table
             String sql = "CREATE TABLE training_centres " +
                     "(centre_id int, capacity int, open bit, " +
                     "PRIMARY KEY (centre_id))";
 
             statement.executeUpdate(sql);
 
-
-
+            //Create Clients Table
             sql = """
                 CREATE TABLE clients(
                 client_id int,
@@ -79,10 +96,9 @@ public class TraineeDAO {
                 happy bit,
                 PRIMARY KEY (client_id))
             """;
-
             statement.executeUpdate(sql);
 
-
+            //Create Trainees Table
             sql = """
                     CREATE TABLE trainees (
                     trainee_id int, 
@@ -111,7 +127,7 @@ public class TraineeDAO {
                     FROM training_centres_with_occupancy tcwo
                     INNER JOIN trainees t
                     ON tcwo.centre_id = t.centre_id
-                    WHERE tcwo.occupancy = tcwo.capacity
+                    WHERE tcwo.occupancy = tcwo.capacity 
                 """;
             ResultSet rs = statement.executeQuery(sql);
             ArrayList<Integer> intArrayList = new ArrayList<>();
@@ -201,24 +217,6 @@ public class TraineeDAO {
     }
 
 
-
-    public void openConnection(){
-
-        try {
-            if(this.connection == null) {
-                Properties props = new Properties();
-                props.load(new FileReader("mysql.properties"));
-                connection = DriverManager.getConnection(
-                    props.getProperty("dburl"),
-                    props.getProperty("dbuserid"),
-                    props.getProperty("dbpassword"));
-            }
-
-        } catch (IOException | SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void closeConnection(){
         try {
             this.connection.close();
@@ -295,8 +293,6 @@ public class TraineeDAO {
         }
     }
 
-
-
     public void addTrainingCentre(TrainingCentre t){
         if (t == null) return;
 
@@ -360,6 +356,7 @@ public class TraineeDAO {
         }
         return false;
     }
+
     int getTrainingCentreOccupancies(){
         PreparedStatement preparedStatement = null;
         try {
@@ -375,8 +372,6 @@ public class TraineeDAO {
         }
         return 0;
     }
-
-
 
     public int getTrainingTraineesCount(){
         Statement statement  = null;
@@ -408,8 +403,6 @@ public class TraineeDAO {
 
         return new int[0];
     }
-
-
 
     public Trainee[] getTrainingTrainees() {
         Statement statement  = null;
@@ -585,13 +578,11 @@ public class TraineeDAO {
                 statement.close();
                 sql = """
                       CREATE VIEW training_centres_with_occupancy AS
-                      SELECT centre_id, capacity, COUNT(*) AS occupancy FROM (
-                          SELECT tc.centre_id, tc.capacity, t.trainee_id
-                          FROM training_centres tc
-                          INNER JOIN trainees t
-                          ON t.centre_id = tc.centre_id
-                      ) nt
-                      GROUP BY centre_id;
+                      SELECT tc.centre_id, tc.capacity, COUNT(t.trainee_id) AS occupancy
+                      FROM training_centres tc 
+                      INNER JOIN trainees t
+                      ON t.centre_id = tc.centre_id
+                      GROUP BY tc.centre_id, tc.capacity;
                   """;
             statement = connection.createStatement();
             statement.executeUpdate(sql);
