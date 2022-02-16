@@ -16,7 +16,7 @@ public class TraineeFactory {
     }
 
     public Trainee makeTrainee(){
-        Trainee trainee = new Trainee(nextID, getRandomCourse());
+        Trainee trainee = new Trainee(nextID, Course.getRandomCourse());
         nextID++;
         return trainee;
     }
@@ -25,10 +25,5 @@ public class TraineeFactory {
         Trainee[] trainees = new Trainee[(rand.nextInt(min, (max + 1)))];
         for(int i = 0; i < trainees.length; i++) trainees[i] = makeTrainee();
         return trainees;
-    }
-
-    private String getRandomCourse() {
-        Course[] courses = Course.values();
-        return courses[rand.nextInt(courses.length)].name;
     }
 }
