@@ -19,7 +19,6 @@ public class Simulation {
         TraineeFactory tf = new TraineeFactory();
         TrainingCentreFactory tcf = new TrainingCentreFactory();
         ClientFactory cf = new ClientFactory();
-
         for(int i = 0; i < months; i++) {
             loop(i, tdao, tf, tcf, cf);
             if(infoGivenMonthly) DisplayManager.printSystemInfo(tdao);
@@ -32,11 +31,11 @@ public class Simulation {
         if((month % 2) == 1) {
             do {
                 newCentre = tcf.makeCentre();
-            } while((!newCentre.getCentreType().equals("BOOTCAMP")) || (!maxBootCampsExist(tdao))); //Infinite Loop
+            } while((newCentre.getCentreType().equals("BOOTCAMP")) && (maxBootCampsExist(tdao)));
             tdao.insertCentre(newCentre);
             if(newCentre.getCentreType().equals("TRAININGHUB")) for(int i = 0; i < 2; i++) tdao.insertCentre(tcf.makeCentre("TRAININGHUB"));
         }
-        System.out.println("Created new centre");
+
         // for all happy clients that have been waiting for over a year, create a new requirement
         tdao.getClients().stream()
                 .filter(c -> (c.getState().equals("HAPPY") && ((month - c.getReqStartMonth()) >= 12)))
@@ -57,14 +56,12 @@ public class Simulation {
                     t.setTrainingState("BENCH");
                     tdao.insertTrainee(t);
                 });
-
         // get benched trainees
         // get waiting clients ordered by wait time
         // for each benched trainee, try to assign to a client, with priority to clients earlier in list
         tdao.getTrainees().stream()
                 .filter(t -> (t.getTrainingState().equals("BENCH")))
                 .forEach(t -> assignTraineeToReq(t, tdao));
-
         // set clients with requirements met to "happy"
         tdao.getClients().stream()
                 .filter(c -> ((c.getState().equals("WAITING")) && (isRequirementMet(c, tdao))))
@@ -72,7 +69,6 @@ public class Simulation {
                     c.setState("HAPPY");
                     tdao.insertClient(c);
                 });
-
         // set clients that have been waiting for over a year and have not met their requirements to "unhappy"
         // and bench any trainees assigned to their most recent requirement
         tdao.getClients().stream()
@@ -114,7 +110,6 @@ public class Simulation {
         tdao.getTrainees().stream()
                 .filter(t -> t.getTrainingState().equals("TRAINING"))
                 .forEach(t -> t.incrementMonthsTraining());
-
     }
 
     private static boolean maxBootCampsExist(TraineeDAO tdao) {
