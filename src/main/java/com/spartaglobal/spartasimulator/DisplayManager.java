@@ -44,8 +44,6 @@ public class DisplayManager {
 
     public static void printSystemInfo(TraineeDAO tdao){
 
-        // MAKE SURE THE CENTRETYPE COLUMN IS ADDED TO THE TRAINING CENTRES TABLE
-
         tdao.getCentres().stream().map(c -> c.getCentreType()); // Getting centre types. Probably will have to use forEach()
         tdao.getCentres().stream().filter(c -> c.getIsOpen() == true).filter(c -> c.getTrainingCentreCapacity() > 0).count();
         tdao.getCentres().stream().filter(c -> c.getIsOpen() == true).filter(c -> c.getTrainingCentreCapacity() == 0).count();
@@ -54,11 +52,11 @@ public class DisplayManager {
         tdao.getTrainees().stream().filter(t -> t.getTrainingState().equals("TRAINING")).count();
         tdao.getTrainees().stream().filter(t -> t.getTrainingState().equals("WAITING")).count();
 
-        System.out.println(Message.CENTRES_OPEN);
-        System.out.println(Message.FULL_CENTRES);
-        System.out.println(Message.CLOSED_CENTRES);
-        System.out.println(Message.TRAINEES_TRAINING);
-        System.out.println(Message.TRAINEES_WAITING);
+        System.out.println(Message.CENTRES_OPEN.message);
+        System.out.println(Message.FULL_CENTRES.message);
+        System.out.println(Message.CLOSED_CENTRES.message);
+        System.out.println(Message.TRAINEES_TRAINING.message);
+        System.out.println(Message.TRAINEES_WAITING.message);
 
     }
 
