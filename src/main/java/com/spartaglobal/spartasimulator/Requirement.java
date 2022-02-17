@@ -1,28 +1,29 @@
 package com.spartaglobal.spartasimulator;
 
-public class Client {
+public class Requirement {
+    private int reqID;
     private int clientID;
-    private String state;
     private String reqType;
     private int reqStartMonth;
     private int reqQuantity;
+    private int assignedTrainees;
 
-    public Client(int clientID, String state, String reqType, Integer reqStartMonth, Integer reqQuantity) {
+    public Requirement(int reqID, int clientID, String reqType, int reqStartMonth, int reqQuantity, int assignedTrainees) {
+        this.reqID = reqID;
         this.clientID = clientID;
-        this.state = state;
         this.reqType = reqType;
         this.reqStartMonth = reqStartMonth;
         this.reqQuantity = reqQuantity;
+        this.assignedTrainees = assignedTrainees;
     }
 
+    public int getReqID() { return reqID; }
     public int getClientID() { return clientID; }
-    public String getState() { return state; }
     public String getReqType() { return reqType; }
     public int getReqStartMonth() { return reqStartMonth; }
     public int getReqQuantity() { return reqQuantity; }
+    public int getAssignedTrainees() { return assignedTrainees; }
 
-    public void setState(String state) { this.state = state; }
-    public void setReqStartMonth(Integer reqStartMonth) { this.reqStartMonth = reqStartMonth; }
-
+    public void incrementAssignedTrainees() { assignedTrainees++; }
 
 }
