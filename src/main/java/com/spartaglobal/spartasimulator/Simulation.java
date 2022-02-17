@@ -11,6 +11,7 @@ public class Simulation {
     private static final int MIN_GENERATED_TRAINEES = 50;
     private static final int MAX_GENERATED_TRAINEES = 100;
     private static final int CENTRE_ATTENDANCE_THRESHOLD = 25;
+    private static final int MAX_BOOT_CAMPS = 2;
     private static final double CLIENT_CREATION_CHANCE = 0.5;
     private static final Random rand = new Random();
 
@@ -26,19 +27,24 @@ public class Simulation {
     }
 
     private static void loop(int month, TraineeDAO tdao, TraineeFactory tf, TrainingCentreFactory tcf, ClientFactory cf){
+        TrainingCentre newCentre;
         if((month % 2) == 1) {
-            TrainingCentre centre = tcf.makeCentre();
-            tdao.insertCentre(centre);
-            if(centre.getCentreType().equals("BOOTCAMP")) for(int i = 0; i < 2; i++) tdao.insertCentre(tcf.makeCentre("BOOTCAMP"));
+            do {
+                newCentre = tcf.makeCentre();
+            } while((!newCentre.getCentreType().equals("BOOTCAMP")) || (!maxBootCampsExist(tdao)));
+            tdao.insertCentre(newCentre);
+            if(newCentre.getCentreType().equals("TRAININGHUB")) for(int i = 0; i < 2; i++) tdao.insertCentre(tcf.makeCentre("TRAININGHUB"));
         }
 
         // for all happy clients that have been waiting for over a year, create a new requirement
         tdao.getClients().stream()
                 .filter(c -> (c.getState().equals("HAPPY") && ((month - c.getReqStartMonth()) >= 12)))
-                .forEach(c -> tdao.insertRequirement(c))
-                .forEach(c -> c.setState("WAITING"))
-                .forEach(c -> c.setReqStartMonth(month))
-                .forEach(c -> tdao.insertClient(c));
+                .forEach(c -> {
+                    tdao.insertRequirement(new Requirement(c));
+                    c.setState("WAITING");
+                    c.setReqStartMonth(month);
+                    tdao.insertClient(c);
+                });
 
 
         if((month >= 12) && (rand.nextDouble() < CLIENT_CREATION_CHANCE)) tdao.insertClient(cf.makeClient(month));
@@ -46,8 +52,10 @@ public class Simulation {
         // trainees that have been training for three months become benched
         tdao.getTrainees().stream()
                 .filter(t -> ((t.getMonthsTraining() >= 3) && (t.getTrainingState().equals("TRAINING"))))
-                .forEach(t -> setTrainingState("BENCH"))
-                .forEach(t -> tdao.insertTrainee(t));
+                .forEach(t -> {
+                    t.setTrainingState("BENCH");
+                    tdao.insertTrainee(t);
+                });
         // get benched trainees
         // get waiting clients ordered by wait time
         // for each benched trainee, try to assign to a client, with priority to clients earlier in list
@@ -57,14 +65,18 @@ public class Simulation {
         // set clients with requirements met to "happy"
         tdao.getClients().stream()
                 .filter(c -> ((c.getState().equals("WAITING")) && (isRequirementMet(c, tdao))))
-                .forEach(c -> c.setState("HAPPY"))
-                .forEach(c -> tdao.insertClient(c));
+                .forEach(c -> {
+                    c.setState("HAPPY");
+                    tdao.insertClient(c);
+                });
         // set clients that have been waiting for over a year and have not met their requirements to "unhappy"
         // and bench any trainees assigned to their most recent requirement
         tdao.getClients().stream()
                 .filter(c -> ((c.getState().equals("WAITING")) && (!isRequirementMet(c, tdao))))
-                .forEach(c -> c.setState("UNHAPPY"))
-                .forEach(c -> unassignTraineesFromReq(c, tdao));
+                .forEach(c -> {
+                    c.setState("UNHAPPY");
+                    unassignTraineesFromReq(c, tdao);
+                });
 
         tdao.getTrainees().stream()
                 .filter(t -> t.getTrainingState().equals("WAITING"))
@@ -85,8 +97,10 @@ public class Simulation {
                 .filter(c -> (c instanceof BootCamp))
                 .filter(c -> c.getIsOpen())
                 .filter(c -> !isCentreLowAttendance(c, tdao))
-                .forEach(c -> ((BootCamp) c).setMonthsBelowThreshold(0))
-                .forEach(c -> tdao.insertCentre(c));
+                .forEach(c -> {
+                    ((BootCamp) c).setMonthsBelowThreshold(0);
+                    tdao.insertCentre(c);
+                });
 
         tdao.getTrainees().stream()
                 .filter(t -> t.getTrainingState().equals("TRAINING"))
@@ -96,21 +110,28 @@ public class Simulation {
         tdao.getTrainees().stream()
                 .filter(t -> t.getTrainingState().equals("TRAINING"))
                 .forEach(t -> t.incrementMonthsTraining());
+    }
 
-        tdao.reassignTraineesInClosedCentres();
+    private static boolean maxBootCampsExist(TraineeDAO tdao) {
+        return (tdao.getCentres().stream()
+                .filter(c -> (c instanceof BootCamp))
+                .filter(c -> (c.getIsOpen()))
+                .count() >= MAX_BOOT_CAMPS);
     }
 
     private static void assignTraineeToReq(Trainee t, TraineeDAO tdao) {
         Requirement firstValidReq = tdao.getRequirements().stream()
                 .filter(r -> r.getReqType().equals(t.getTraineeCourse()))
-                .findFirst(r -> (r.getReqQuantity() > r.assignedTrainees()))
+                .filter(r -> (r.getReqQuantity() > r.getAssignedTrainees()))
+                .findFirst()
                 .orElse(null);
         if(firstValidReq != null) {
             t.setReqID(firstValidReq.getReqID());
             t.setTrainingState("WORKING");
             firstValidReq.incrementAssignedTrainees();
             tdao.insertTrainee(t);
-            tdao.insertReq(firstValidReq);
+            tdao.insertRequirement(firstValidReq);
+
         }
     }
 
@@ -131,14 +152,16 @@ public class Simulation {
         int currentReqID = getCurrentReq(c, tdao).getReqID();
         tdao.getTrainees().stream()
                 .filter(t -> (t.getReqID() == currentReqID))
-                .forEach(t -> t.setReqID(null))
-                .forEach(t -> tdao.insertTrainee(t));
+                .forEach(t -> {
+                    t.setReqID(null);
+                    tdao.insertTrainee(t);
+                });
     }
 
     private static void assignTraineeToCentre(Trainee t, TraineeDAO tdao) {
-        ArrayList<TrainingCentre> nonFullCentres = tdao.getCentres().stream()
+        ArrayList<TrainingCentre> nonFullCentres = new ArrayList<>(tdao.getCentres().stream()
                 .filter(c -> !isCentreFull(c, tdao))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
         for(TrainingCentre c : nonFullCentres) {
             if(c instanceof TechCentre) {
                 if(((TechCentre) c).getCourse().equals(t.getTraineeCourse())) {
@@ -174,5 +197,14 @@ public class Simulation {
             else ((BootCamp) tc).setMonthsBelowThreshold(((BootCamp) tc).getMonthsBelowThreshold() + 1);
         } else tc.setIsOpen(false);
         tdao.insertCentre(tc);
+    }
+
+    private static boolean inClosedCentre(Trainee t, TraineeDAO tdao) {
+        TrainingCentre tc = tdao.getCentres().stream()
+                .filter(c -> (c.getTrainingCentreID() == t.getCentreID()))
+                .findFirst()
+                .orElse(null);
+        if((tc == null) || (tc.getIsOpen())) return false; //else
+        return true;
     }
 }
