@@ -26,6 +26,7 @@ public class Trainee {
     public Integer getCentreID() {
         return centreID;
     }
+    public Integer getReqID() { return reqID; }
     public String getTraineeCourse() { return course;}
     public String getTrainingState() { return trainingState; }
     public int getMonthsTraining() { return monthsTraining; }
@@ -40,7 +41,4 @@ public class Trainee {
     public void setTrainingState(String trainingState) { this.trainingState = trainingState; }
     public void incrementMonthsTraining() { monthsTraining++; }
 
-    public Integer getReqID() {
-        return this.reqID;
-    }
 }
