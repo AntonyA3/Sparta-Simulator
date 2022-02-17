@@ -2,7 +2,14 @@ package com.spartaglobal.spartasimulator;
 
 public class TechCentre extends TrainingCentre{
 
-    public TechCentre(int trainingCentreID) { super(trainingCentreID, 200); }
+    private String course;
+
+    public TechCentre(int trainingCentreID, boolean isOpen, String course) {
+        super(trainingCentreID, 200, "Tech Centre", isOpen);
+        this.course = course;
+    }
+
+    public String getCourse() { return course; }
 
     @Override
     public String getTrainingCentreCatagory() {
