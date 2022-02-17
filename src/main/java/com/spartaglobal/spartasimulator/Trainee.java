@@ -40,4 +40,5 @@ public class Trainee {
     public void setReqID(Integer reqID) { this.reqID = reqID; }
     public void setTrainingState(String trainingState) { this.trainingState = trainingState; }
     public void incrementMonthsTraining() { monthsTraining++; }
+
 }
