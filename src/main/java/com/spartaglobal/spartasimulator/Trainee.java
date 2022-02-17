@@ -27,6 +27,7 @@ public class Trainee {
         return centreID;
     }
     public String getTraineeCourse() { return course;}
+    public String getTrainingState() { return trainingState; }
     public int getMonthsTraining() { return monthsTraining; }
 
     public void setCourse(String course) {
@@ -37,4 +38,5 @@ public class Trainee {
     }
     public void setReqID(Integer reqID) { this.reqID = reqID; }
     public void setTrainingState(String trainingState) { this.trainingState = trainingState; }
+    public void incrementMonthsTraining() { monthsTraining++; }
 }

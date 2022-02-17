@@ -7,13 +7,13 @@ public class TrainingCentreFactory {
     private int nextID;
     private static final int STARTING_ID = 0;
     private static final Random rand = new Random();
-    private static final String[] CENTRE_TYPES = {"Training Hub", "Boot Camp", "Tech Centre"};
+    private static final String[] CENTRE_TYPES = {"TRAININGHUB", "BOOTCAMP", "TECHCENTRE"};
 
     public TrainingCentre makeCentre(String centreType) {
         TrainingCentre tc =  switch(centreType) {
-            case "Training Hub" -> new TrainingHub(nextID);
-            case "Boot Camp" -> new BootCamp(nextID);
-            case "Tech Centre" -> new TechCentre(nextID);
+            case "TRAININGHUB" -> new TrainingHub(nextID, true);
+            case "BOOTCAMP" -> new BootCamp(nextID, true, 0);
+            case "TECHCENTRE" -> new TechCentre(nextID, true, Course.getRandomCourse());
             default -> null; // this should never happen
         };
         nextID++;

@@ -5,20 +5,19 @@ public abstract class TrainingCentre {
     private String centreType;
     private int trainingCentreCapacity;
     private boolean isOpen;
-    private int monthsBelowThreshold;
 
-    public TrainingCentre(int trainingCentreID, int trainingCentreCapacity, String centreType){
+    public TrainingCentre(int trainingCentreID, int trainingCentreCapacity, String centreType, boolean isOpen){
         this.trainingCentreID = trainingCentreID;
         this.trainingCentreCapacity = trainingCentreCapacity;
         this.centreType = centreType;
-        this.isOpen = true;
-        this.monthsBelowThreshold = 0;
+        this.isOpen = isOpen;
     }
 
     public int getTrainingCentreID() { return trainingCentreID; }
     public String getCentreType() { return centreType; }
     public int getTrainingCentreCapacity() { return trainingCentreCapacity; }
     public boolean getIsOpen() { return isOpen; }
-    public int getMonthsBelowThreshold() { return monthsBelowThreshold; }
+
+    public void setIsOpen(boolean isOpen) { this.isOpen = isOpen; }
 
 }

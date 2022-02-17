@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class Simulation {
 
     private static final int MIN_GENERATED_TRAINEES = 50;
     private static final int MAX_GENERATED_TRAINEES = 100;
+    private static final int CENTRE_ATTENDANCE_THRESHOLD = 25;
     private static final double CLIENT_CREATION_CHANCE = 0.5;
     private static final Random rand = new Random();
 
@@ -57,23 +59,44 @@ public class Simulation {
                 .filter(c -> ((c.getState().equals("WAITING")) && (isRequirementMet(c, tdao))))
                 .forEach(c -> c.setState("HAPPY"))
                 .forEach(c -> tdao.insertClient(c));
-
-        tdao.setSatisfiedClientsToHappy();
         // set clients that have been waiting for over a year and have not met their requirements to "unhappy"
         // and bench any trainees assigned to their most recent requirement
-        Client[] unsatisfiedClients = tdao.getUnsatisfiedClients();
-        for(Client c : unsatisfiedClients) {
-            tdao.setClientUnhappy(c);
-            for(Trainee t : getWorkingTrainees(c)) {
-                tdao.setTraineeBenched(t);
-            }
-        }
+        tdao.getClients().stream()
+                .filter(c -> ((c.getState().equals("WAITING")) && (!isRequirementMet(c, tdao))))
+                .forEach(c -> c.setState("UNHAPPY"))
+                .forEach(c -> unassignTraineesFromReq(c, tdao));
 
-        Arrays.stream(tdao.getWaitingTrainees(true)).forEach(t -> tdao.addTrainee(t));
-        Arrays.stream(tf.getNewTrainees(month, MIN_GENERATED_TRAINEES, MAX_GENERATED_TRAINEES)).forEach(t -> tdao.addTrainee(t));
+        tdao.getTrainees().stream()
+                .filter(t -> t.getTrainingState().equals("WAITING"))
+                .forEach(t -> assignTraineeToCentre(t, tdao));
+
+
+        Arrays.stream(tf.getNewTrainees(month, MIN_GENERATED_TRAINEES, MAX_GENERATED_TRAINEES))
+                .forEach(t -> assignTraineeToCentre(t, tdao));
 
         // potentially close centres and redistribute trainees
-        Arrays.stream(tdao.getLowAttendanceCentres()).forEach(tc -> tdao.closeCentre(tc));
+
+        tdao.getCentres().stream()
+                .filter(c -> c.getIsOpen())
+                .filter(c -> isCentreLowAttendance(c, tdao))
+                .forEach(c -> closeCentreOrIncrementMonths(c, tdao));
+
+        tdao.getCentres().stream()
+                .filter(c -> (c instanceof BootCamp))
+                .filter(c -> c.getIsOpen())
+                .filter(c -> !isCentreLowAttendance(c, tdao))
+                .forEach(c -> ((BootCamp) c).setMonthsBelowThreshold(0))
+                .forEach(c -> tdao.insertCentre(c));
+
+        tdao.getTrainees().stream()
+                .filter(t -> t.getTrainingState().equals("TRAINING"))
+                .filter(t -> inClosedCentre(t, tdao))
+                .forEach(t -> assignTraineeToCentre(t, tdao));
+
+        tdao.getTrainees().stream()
+                .filter(t -> t.getTrainingState().equals("TRAINING"))
+                .forEach(t -> t.incrementMonthsTraining());
+
         tdao.reassignTraineesInClosedCentres();
     }
 
@@ -91,12 +114,65 @@ public class Simulation {
         }
     }
 
-    private static boolean isRequirementMet(Client c, TraineeDAO tdao) {
-        Requirement currentReq = tdao.getRequirements().stream()
+    private static Requirement getCurrentReq(Client c, TraineeDAO tdao) {
+        return tdao.getRequirements().stream()
                 .filter(r -> (r.getClientID() == c.getClientID()))
                 .max(Comparator.comparing(Requirement::getReqID)).orElse(null);
+    }
+
+    private static boolean isRequirementMet(Client c, TraineeDAO tdao) {
+        Requirement currentReq = getCurrentReq(c, tdao);
         if(currentReq != null) {
             return (currentReq.getAssignedTrainees() == currentReq.getReqQuantity());
         } else return true; // this should never be possible
+    }
+
+    private static void unassignTraineesFromReq(Client c, TraineeDAO tdao) {
+        int currentReqID = getCurrentReq(c, tdao).getReqID();
+        tdao.getTrainees().stream()
+                .filter(t -> (t.getReqID() == currentReqID))
+                .forEach(t -> t.setReqID(null))
+                .forEach(t -> tdao.insertTrainee(t));
+    }
+
+    private static void assignTraineeToCentre(Trainee t, TraineeDAO tdao) {
+        ArrayList<TrainingCentre> nonFullCentres = tdao.getCentres().stream()
+                .filter(c -> !isCentreFull(c, tdao))
+                .collect(Collectors.toList());
+        for(TrainingCentre c : nonFullCentres) {
+            if(c instanceof TechCentre) {
+                if(((TechCentre) c).getCourse().equals(t.getTraineeCourse())) {
+                    t.setCentreID(c.getTrainingCentreID());
+                    t.setTrainingState("TRAINING");
+                    tdao.insertTrainee(t);
+                    return;
+                }
+            } else {
+                t.setCentreID(c.getTrainingCentreID());
+                t.setTrainingState("TRAINING");
+                tdao.insertTrainee(t);
+                return;
+            }
+        }
+    }
+
+    private static boolean isCentreFull(TrainingCentre tc, TraineeDAO tdao) {
+        return (tdao.getTrainees().stream()
+                .filter(t -> t.getCentreID().equals(tc.getTrainingCentreID()))
+                .count() >= tc.getTrainingCentreCapacity()); // should never be greater than
+    }
+
+    private static boolean isCentreLowAttendance(TrainingCentre tc, TraineeDAO tdao) {
+        return (tdao.getTrainees().stream()
+                .filter(t -> t.getCentreID().equals(tc.getTrainingCentreID()))
+                .count() < CENTRE_ATTENDANCE_THRESHOLD);
+    }
+
+    private static void closeCentreOrIncrementMonths(TrainingCentre tc, TraineeDAO tdao) {
+        if(tc instanceof BootCamp) {
+            if(((BootCamp) tc).getMonthsBelowThreshold() > 2) tc.setIsOpen(false);
+            else ((BootCamp) tc).setMonthsBelowThreshold(((BootCamp) tc).getMonthsBelowThreshold() + 1);
+        } else tc.setIsOpen(false);
+        tdao.insertCentre(tc);
     }
 }
