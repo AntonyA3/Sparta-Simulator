@@ -43,11 +43,14 @@ public class DisplayManager {
     }
 
     public static void printSystemInfo(TraineeDAO tdao){
+
+        // MAKE SURE THE CENTRETYPE COLUMN IS ADDED TO THE TRAINING CENTRES TABLE
+
         tdao.getCentres().stream().map(c -> c.getCentreType()); // Getting centre types. Probably will have to use forEach()
-        tdao.getCentres().stream().filter(c -> c.isOpen() == true).filter(c -> c.getTrainingCentreCapacity() > 0).count();
-        tdao.getCentres().stream().filter(c -> c.isOpen() == true).filter(c -> c.getTrainingCentreCapacity() == 0).count();
-        tdao.getCentres().stream().filter(c -> c.isOpen() == false).count();
-        tdao.getTrainees().stream().map(t -> t.course());// Getting course types. Probably will have to use forEach()
+        tdao.getCentres().stream().filter(c -> c.getIsOpen() == true).filter(c -> c.getTrainingCentreCapacity() > 0).count();
+        tdao.getCentres().stream().filter(c -> c.getIsOpen() == true).filter(c -> c.getTrainingCentreCapacity() == 0).count();
+        tdao.getCentres().stream().filter(c -> c.getIsOpen() == false).count();
+        tdao.getTrainees().stream().map(t -> t.getTraineeCourse());// Getting course types. Probably will have to use forEach()
         tdao.getTrainees().stream().filter(t -> t.getTrainingState().equals("TRAINING")).count();
         tdao.getTrainees().stream().filter(t -> t.getTrainingState().equals("WAITING")).count();
 
