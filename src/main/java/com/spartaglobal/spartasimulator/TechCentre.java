@@ -11,4 +11,8 @@ public class TechCentre extends TrainingCentre{
 
     public String getCourse() { return course; }
 
+    @Override
+    public String getTrainingCentreCatagory() {
+        return "TECH CENTRE";
+    }
 }

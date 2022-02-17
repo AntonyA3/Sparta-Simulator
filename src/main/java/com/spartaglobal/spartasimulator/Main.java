@@ -15,6 +15,7 @@ public class Main {
     public static void main(String[] args) {
         TraineeDAO tdao = new TraineeDAO();
         tdao.openConnection();
+        tdao.createTables();
         int months = getMonths();
         boolean infoGivenMonthly = getInfoGivenMonthly();
         DisplayManager.printMessage(DisplayManager.Message.SIMULATION_START, months);
