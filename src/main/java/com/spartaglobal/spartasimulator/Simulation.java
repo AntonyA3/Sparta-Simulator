@@ -31,7 +31,7 @@ public class Simulation {
         if((month % 2) == 1) {
             do {
                 newCentre = tcf.makeCentre();
-            } while((!newCentre.getCentreType().equals("BOOTCAMP")) || (!maxBootCampsExist(tdao)));
+            } while((newCentre.getCentreType().equals("BOOTCAMP")) && (maxBootCampsExist(tdao)));
             tdao.insertCentre(newCentre);
             if(newCentre.getCentreType().equals("TRAININGHUB")) for(int i = 0; i < 2; i++) tdao.insertCentre(tcf.makeCentre("TRAININGHUB"));
         }
