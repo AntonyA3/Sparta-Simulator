@@ -20,4 +20,5 @@ public abstract class TrainingCentre {
 
     public void setIsOpen(boolean isOpen) { this.isOpen = isOpen; }
 
+    public abstract String getTrainingCentreCatagory();
 }

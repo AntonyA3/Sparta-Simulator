@@ -6,7 +6,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
-import java.util.Random;
 
 public class TraineeDAO {
     private Connection connection = null;
@@ -96,7 +95,7 @@ public class TraineeDAO {
                     training_centre_type VARCHAR(50),
                     training_centre_capacity INT, 
                     training_centre_open BIT,
-                    PRIMARY KEY (centre_id)
+                    PRIMARY KEY (training_centre_id)
                 )    
             """;
             statement.executeUpdate(sql);
@@ -118,15 +117,30 @@ public class TraineeDAO {
             sql = """
                     CREATE TABLE trainees (
                         trainee_id INT, 
-                        centre_id int,
-                        client_id int,
+                        centre_id INT,
                         course VARCHAR(50),
+                        req_id INT,
                         training_state VARCHAR(50),
+                        months_training int,
                         PRIMARY KEY (trainee_id),
                         FOREIGN KEY (centre_id) REFERENCES training_centres(centre_id)
                     );
             """;
             statement.executeUpdate(sql);
+
+            //Create Requirements Table
+            sql = """
+                    CREATE TABLE requirements (
+                       req_id   int,
+                       client_id    int,
+                       req_type     VARCHAR(50),
+                       req_start_mont   INT,
+                       req_quantity     INT,
+                       assigned_trainees    INT   
+                    );
+            """;
+            statement.executeUpdate(sql);
+
             statement.close();
 
         } catch (SQLException e) {
@@ -155,7 +169,7 @@ public class TraineeDAO {
     public ArrayList<Client> getClients() {
         ArrayList<Client> clients = new ArrayList<>();
         String sql = """
-            SELECT client_id
+            SELECT client_id, client_state, client_req_type, client_req_start_month, client_req_start_quantity
             FROM clients;
         """;
 
@@ -180,6 +194,84 @@ public class TraineeDAO {
 
         return clients;
     }
+
+    public ArrayList<Trainee> getTrainees() {
+        ArrayList<Trainee> trainees = new ArrayList<>();
+        String sql = """
+            SELECT trainee_id, course, centre_id, req_id, training_state, months_training
+            FROM clients;
+        """;
+        try{
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()){
+                int traineeId = rs.getInt("trainee_id");
+                String course = rs.getString("course");
+                Integer centreId = (rs.getObject("centre_id") != null) ?
+                        rs.getInt("centre_id") : null;
+                Integer reqId = (rs.getObject("req_id") != null) ?
+                        rs.getInt("req_id") : null;
+                String trainingState = rs.getString("training_state");
+                int monthsTraining = rs.getInt("months_training");
+                Trainee trainee = new Trainee(traineeId, course, centreId, reqId, trainingState, monthsTraining);
+                trainees.add(trainee);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return trainees;
+    }
+
+    public ArrayList<TrainingCentre> getCentres() {
+        ArrayList<TrainingCentre> trainingCentres = new ArrayList<>();
+        String sql = """
+            SELECT training_centre_id, training_centre_type, training_centre_capacity, training_centre_open
+            FROM training_centres;
+        """;
+        try{
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()){
+                TrainingCentre trainingCentre = new TrainingCentreFactory().makeCentre(rs.getString("training_centre_type"));
+                trainingCentre.setIsOpen(rs.getBoolean("training_centre_open"));
+                trainingCentres.add(trainingCentre);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return trainingCentres;
+    }
+
+    public ArrayList<Requirement> getRequirements() {
+        ArrayList<Requirement> requirements = new ArrayList<Requirement>();
+        String sql = """
+            SELECT req_id, client_id, req_type, req_start_month, req_quantity, assigned_trainees     
+            FROM requirements;
+        """;
+
+        try{
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()){
+                int reqId = rs.getInt("req_id");
+                int clientId = rs.getInt("client_id");
+                String reqType = rs.getString("req_type");
+                int reqStartMonth = rs.getInt("req_start_month");
+                int reqQuantity = rs.getInt("req_quantity");
+                int assignedTrainees = rs.getInt("assigned_trainees")
+                Requirement requirement = new Requirement(reqId, clientId, reqType, reqStartMonth, reqQuantity, assignedTrainees);
+                requirements.add(requirement);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requirements;
+    }
+
+    public void insertRequirement(Client c) {
+    }
+
 //
 //    public void insertRequirement(Client c) {
 //        String sql = """
