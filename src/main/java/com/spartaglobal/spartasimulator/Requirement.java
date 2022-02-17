@@ -17,6 +17,10 @@ public class Requirement {
         this.assignedTrainees = assignedTrainees;
     }
 
+    public Requirement(Client c) {
+        this.clientID = c.getClientID();
+    }
+
     public int getReqID() { return reqID; }
     public int getClientID() { return clientID; }
     public String getReqType() { return reqType; }
