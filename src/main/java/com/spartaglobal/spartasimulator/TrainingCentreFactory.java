@@ -1,13 +1,25 @@
 package com.spartaglobal.spartasimulator;
 
+import java.util.Random;
+
 public class TrainingCentreFactory {
 
-    public TrainingCentre makeCentre(int centreID, String centreType) {
-        return switch(centreType) {
-            case "traininghub" -> new TrainingHub(centreID);
-            case "bootcamp" -> new BootCamp(centreID);
-            case "techcentre" -> new TechCentre(centreID);
+    private int nextID;
+    private static final int STARTING_ID = 0;
+    private static final Random rand = new Random();
+    private static final String[] CENTRE_TYPES = {"TRAININGHUB", "BOOTCAMP", "TECHCENTRE"};
+
+    public TrainingCentre makeCentre(String centreType) {
+        TrainingCentre tc =  switch(centreType) {
+            case "TRAININGHUB" -> new TrainingHub(nextID, true);
+            case "BOOTCAMP" -> new BootCamp(nextID, true, 0);
+            case "TECHCENTRE" -> new TechCentre(nextID, true, Course.getRandomCourse());
             default -> null; // this should never happen
         };
+        nextID++;
+        return tc;
     }
+
+    public TrainingCentre makeCentre() { return makeCentre(CENTRE_TYPES[rand.nextInt(CENTRE_TYPES.length)]); }
+
 }
