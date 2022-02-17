@@ -77,4 +77,15 @@ public class TraineeDAO {
     }
 
 
+    public int[] getCentreCapacities() {
+        return null;
+    }
+
+    public ArrayList<Trainee> getTrainingTrainees() {
+        return null;
+    }
+
+    public ArrayList<Trainee> getWaitingTrainees(boolean b) {
+        return null;
+    }
 }
