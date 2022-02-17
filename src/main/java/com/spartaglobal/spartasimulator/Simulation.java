@@ -11,6 +11,7 @@ public class Simulation {
     private static final int MIN_GENERATED_TRAINEES = 50;
     private static final int MAX_GENERATED_TRAINEES = 100;
     private static final int CENTRE_ATTENDANCE_THRESHOLD = 25;
+    private static final int MAX_BOOT_CAMPS = 2;
     private static final double CLIENT_CREATION_CHANCE = 0.5;
     private static final Random rand = new Random();
 
@@ -26,10 +27,13 @@ public class Simulation {
     }
 
     private static void loop(int month, TraineeDAO tdao, TraineeFactory tf, TrainingCentreFactory tcf, ClientFactory cf){
+        TrainingCentre newCentre;
         if((month % 2) == 1) {
-            TrainingCentre centre = tcf.makeCentre();
-            tdao.insertCentre(centre);
-            if(centre.getCentreType().equals("BOOTCAMP")) for(int i = 0; i < 2; i++) tdao.insertCentre(tcf.makeCentre("BOOTCAMP"));
+            do {
+                newCentre = tcf.makeCentre();
+            } while((!newCentre.getCentreType().equals("BOOTCAMP")) || (!maxBootCampsExist(tdao)));
+            tdao.insertCentre(newCentre);
+            if(centre.getCentreType().equals("TRAININGHUB")) for(int i = 0; i < 2; i++) tdao.insertCentre(tcf.makeCentre("TRAININGHUB"));
         }
 
         // for all happy clients that have been waiting for over a year, create a new requirement
@@ -174,5 +178,12 @@ public class Simulation {
             else ((BootCamp) tc).setMonthsBelowThreshold(((BootCamp) tc).getMonthsBelowThreshold() + 1);
         } else tc.setIsOpen(false);
         tdao.insertCentre(tc);
+    }
+
+    private static boolean maxBootCampsExist(TraineeDAO tdao) {
+        return (tdao.getCentres().stream()
+                .filter(c -> (c instanceof BootCamp))
+                .filter(c -> (c.getIsOpen()))
+                .count() >= MAX_BOOT_CAMPS);
     }
 }
