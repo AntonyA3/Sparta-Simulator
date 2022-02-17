@@ -82,6 +82,10 @@ public class TraineeDAO {
 
     }
 
+    public Connection getConnection(){
+        return this.connection;
+    }
+
     public int getOpenTrainingCentreCount() {
         Statement statement = null;
         try {
@@ -389,7 +393,7 @@ public class TraineeDAO {
         Statement statement = null;
         try {
             statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT capacity, COUNT() FROM training_centres, ;");
+            ResultSet rs = statement.executeQuery("SELECT capacity, COUNT(*) FROM training_centres;");
 
 
         } catch (SQLException e) {
@@ -563,7 +567,7 @@ public class TraineeDAO {
         return result;
     }
 
-    private void createTrainingCentreWithOccupancyView(){
+    public void createTrainingCentreWithOccupancyView(){
         try {
                 Statement statement = connection.createStatement();
 

@@ -27,4 +27,24 @@ public class TraineeTest {
         Trainee testTrainee = new Trainee(53, "Java");
         assertNotEquals(trainee.getTraineeID(), testTrainee.getTraineeID());
     }
+
+    @Test
+    @DisplayName("Given a valid trainee centre ID, setTraineeCentreId, should set the correct value")
+    public void givenValidTraineeCentreId_setTraineeCentreId_SetsWithCorrectValue(){
+        trainee.setCentreId(15);
+        assertEquals(15, trainee.getCentreId());
+    }
+
+    @Test
+    @DisplayName("Given a valid course, setCourse, should set the correct value")
+    public void givenValidCourse_setCourse_SetsWithCorrectValue(){
+        trainee.setCourse(Course.DEVOPS.name);
+        assertEquals("DevOps", trainee.getTraineeCourse());
+    }
+
+    @Test
+    @DisplayName("Given an invalid centreID, setCentreId, should return a NumberFormatException")
+    public void givenInvalidCentreId_exceptionTest_ReturnsNumberFormatException(){
+        NumberFormatException numEx = assertThrows(NumberFormatException.class, () -> trainee.setCentreId(Integer.valueOf("abc%$")));
+    }
 }
