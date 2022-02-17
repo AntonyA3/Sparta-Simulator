@@ -1,11 +1,5 @@
 package com.spartaglobal.spartasimulator;
 
 public class TrainingHub extends TrainingCentre{
-
-    public TrainingHub(int trainingCentreID, boolean isOpen) { super(trainingCentreID, 100, "Training Hub", isOpen); }
-
-    @Override
-    public String getTrainingCentreCatagory() {
-        return "TRAINING HUB";
-    }
+    public TrainingHub(int trainingCentreID, boolean isOpen) { super(trainingCentreID, 100, "TRAININGHUB", isOpen); }
 }
