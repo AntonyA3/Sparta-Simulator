@@ -5,21 +5,21 @@ public class Trainee {
     private int traineeID;
     private String course;
     private Integer centreID;
-    private Integer clientID;
+    private Integer reqID;
     private String trainingState;
-    private int trainingStartMonth;
+    private int monthsTraining;
 
     public Trainee(int traineeID, String course, int trainingStartMonth) {
         this(traineeID, course, null, null, "WAITING", trainingStartMonth);
     }
 
-    public Trainee(int traineeID, String course, Integer centreID, Integer clientID, String trainingState, int trainingStartMonth) {
+    public Trainee(int traineeID, String course, Integer centreID, Integer reqID, String trainingState, int monthsTraining) {
         this.traineeID = traineeID;
         this.course = course;
         this.centreID = centreID;
-        this.clientID = clientID;
+        this.reqID = reqID;
         this.trainingState = trainingState;
-        this.trainingStartMonth = trainingStartMonth;
+        this.monthsTraining = monthsTraining;
     }
 
     public int getTraineeID(){ return traineeID; }
@@ -27,7 +27,7 @@ public class Trainee {
         return centreID;
     }
     public String getTraineeCourse() { return course;}
-    public int getTrainingStartMonth() { return trainingStartMonth; }
+    public int getMonthsTraining() { return monthsTraining; }
 
     public void setCourse(String course) {
         this.course = course;
@@ -35,5 +35,6 @@ public class Trainee {
     public void setCentreID(Integer centreID) {
         this.centreID = centreID;
     }
+    public void setReqID(Integer reqID) { this.reqID = reqID; }
     public void setTrainingState(String trainingState) { this.trainingState = trainingState; }
 }

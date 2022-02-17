@@ -1,5 +1,6 @@
 package com.spartaglobal.spartasimulator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -30,10 +31,10 @@ public class Simulation {
 
         // for all happy clients that have been waiting for over a year, create a new requirement
         tdao.getClients().stream()
-                .filter(c -> (c.getState().equals("HAPPY") && ((month - c.getReqStartMonth) >= 12)))
+                .filter(c -> (c.getState().equals("HAPPY") && ((month - c.getReqStartMonth()) >= 12)))
                 .forEach(c -> tdao.insertRequirement(c))
                 .forEach(c -> c.setState("WAITING"))
-                .forEach(c -> c.setReqStartMonth())
+                .forEach(c -> c.setReqStartMonth(month))
                 .forEach(c -> tdao.insertClient(c));
 
 
@@ -41,16 +42,15 @@ public class Simulation {
 
         // trainees that have been training for three months become benched
         tdao.getTrainees().stream()
-                .filter(t -> (month - t.getTrainingStartMonth()) >= 3)
+                .filter(t -> ((t.getMonthsTraining() >= 3) && (t.getTrainingState().equals("TRAINING"))))
                 .forEach(t -> setTrainingState("BENCH"))
                 .forEach(t -> tdao.insertTrainee(t));
-        Arrays.stream(tdao.getTraineesTrainingOverAYear()).forEach(t -> tdao.setTraineeBenched(t));
         // get benched trainees
-        Trainee[] benchedTrainees = tdao.getBenchedTrainees();
         // get waiting clients ordered by wait time
-        Client[] waitingClients = tdao.getWaitingClients();
         // for each benched trainee, try to assign to a client, with priority to clients earlier in list
-        Arrays.stream(benchedTrainees).forEach(t -> tdao.assignTraineeToRequirement(t, waitingClients));
+        tdao.getTrainees()
+                .filter(t -> (t.getTrainingState().equals("BENCH")))
+                .forEach(t -> assignTraineeToReq(t, tdao));
         // set clients with requirements met to "happy"
         tdao.setSatisfiedClientsToHappy();
         // set clients that have been waiting for over a year and have not met their requirements to "unhappy"
@@ -69,5 +69,19 @@ public class Simulation {
         // potentially close centres and redistribute trainees
         Arrays.stream(tdao.getLowAttendanceCentres()).forEach(tc -> tdao.closeCentre(tc));
         tdao.reassignTraineesInClosedCentres();
+    }
+
+    private static void assignTraineeToReq(Trainee t, TraineeDAO tdao) {
+        Requirement firstValidReq = tdao.getRequirements().stream()
+                .filter(r -> r.getReqType().equals(t.getTraineeCourse()))
+                .findFirst(r -> (r.getReqQuantity() > r.assignedTrainees()))
+                .orElse(null);
+        if(firstValidReq != null) {
+            t.setReqID(firstValidReq.getReqID());
+            t.setTrainingState("WORKING");
+            firstValidReq.incrementAssignedTrainees();
+            tdao.insertTrainee(t);
+            tdao.insertReq(firstValidReq);
+        }
     }
 }
