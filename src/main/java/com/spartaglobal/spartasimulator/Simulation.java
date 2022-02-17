@@ -2,6 +2,7 @@ package com.spartaglobal.spartasimulator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Random;
 
 public class Simulation {
@@ -48,10 +49,15 @@ public class Simulation {
         // get benched trainees
         // get waiting clients ordered by wait time
         // for each benched trainee, try to assign to a client, with priority to clients earlier in list
-        tdao.getTrainees()
+        tdao.getTrainees().stream()
                 .filter(t -> (t.getTrainingState().equals("BENCH")))
                 .forEach(t -> assignTraineeToReq(t, tdao));
         // set clients with requirements met to "happy"
+        tdao.getClients().stream()
+                .filter(c -> ((c.getState().equals("WAITING")) && (isRequirementMet(c, tdao))))
+                .forEach(c -> c.setState("HAPPY"))
+                .forEach(c -> tdao.insertClient(c));
+
         tdao.setSatisfiedClientsToHappy();
         // set clients that have been waiting for over a year and have not met their requirements to "unhappy"
         // and bench any trainees assigned to their most recent requirement
@@ -83,5 +89,14 @@ public class Simulation {
             tdao.insertTrainee(t);
             tdao.insertReq(firstValidReq);
         }
+    }
+
+    private static boolean isRequirementMet(Client c, TraineeDAO tdao) {
+        Requirement currentReq = tdao.getRequirements().stream()
+                .filter(r -> (r.getClientID() == c.getClientID()))
+                .max(Comparator.comparing(Requirement::getReqID)).orElse(null);
+        if(currentReq != null) {
+            return (currentReq.getAssignedTrainees() == currentReq.getReqQuantity());
+        } else return true; // this should never be possible
     }
 }
