@@ -188,7 +188,7 @@ public class Simulation {
     }
 
     /**
-     * Unassigns all trainees assign to the given client's current requirement.
+     * Unassigns all trainees assigned to the given client's current requirement.
      * @param c The client for which to retrieve the current requirement of.
      * @param tdao The object through which the simulation accesses the database.
      */
