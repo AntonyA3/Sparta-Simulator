@@ -1,28 +1,29 @@
 package com.spartaglobal.spartasimulator;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class CourseTest {
+
     @Test
     @DisplayName("Given a a valid course name, getRandomCourse, should return a random course")
     public void givenValidCourseName_getRandomCourse_ReturnARandomCourse() {
-        boolean isgenerated = false;
+        boolean isGenerated = false;
         String s = Course.getRandomCourse();
         switch (s) {
             case ("Java"):
-                isgenerated = true;
+                isGenerated = true;
             case ("C#"):
-                isgenerated = true;
+                isGenerated = true;
             case ("Data"):
-                isgenerated = true;
+                isGenerated = true;
             case ("DevOps"):
-                isgenerated = true;
+                isGenerated = true;
             case ("Business"):
-                isgenerated = true;
-                Assertions.assertEquals(true, isgenerated);
-
+                isGenerated = true;
+                assertTrue(isGenerated);
         }
     }
 }

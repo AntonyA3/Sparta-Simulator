@@ -24,11 +24,9 @@ public class TraineeDAOTest {
         tDAO.closeConnection();
     }
 
-    // getClients
-    // insertClient
     @Test
-    @DisplayName("insertClients")
-    public void insertClients() throws SQLException {    // Done
+    @DisplayName("Given a valid client, insertClients, inserts the record correctly in the clients database")
+    public void givenValidClient_insertClients_InsertsTheRecordCorrectly() throws SQLException {    // Done
         boolean doesExist = false;
         Statement st = tDAO.getConnection().createStatement();
         tDAO.createTables();
@@ -51,8 +49,8 @@ public class TraineeDAOTest {
     }
 
     @Test
-    @DisplayName("getClients")
-    public void getClients(){
+    @DisplayName("Given a valid client, getClients, returns the correct client values")
+    public void givenValidClient_getClients_ReturnsCorrectClientValues(){
         boolean doesExist = false;
 
         tDAO.createTables();
@@ -69,12 +67,20 @@ public class TraineeDAOTest {
         assertTrue(doesExist);
     }
 
-    // getTrainees
-    // insertTraineee
+    @Test
+    @DisplayName("Given a invalid client, getClients, returns a null pointer exception")
+    public void givenInvalidClient_getClients_ReturnsNullPointerException(){
+        tDAO.createTables();
+        Client client = new Client(0, null, null, 0, 0);
+        tDAO.insertClient(client);
+        ArrayList<Client> clients = tDAO.getClients();
+
+        NullPointerException nEx = assertThrows(NullPointerException.class, () -> clients.get(0).getState().equals("state"));
+    }
 
     @Test
-    @DisplayName("insertTrainees")
-    public void insertTrainees() throws SQLException {
+    @DisplayName("Given a valid trainee, insertTrainee, inserts the record correctly in the trainee database")
+    public void givenValidTrainee_insertTrainee_InsertsTheRecordCorrectly() throws SQLException {
         boolean doesExist = false;
         Statement st = tDAO.getConnection().createStatement();
 
@@ -98,8 +104,8 @@ public class TraineeDAOTest {
     }
 
     @Test
-    @DisplayName("getTrainees")
-    public void getTrainees(){
+    @DisplayName("Given a valid trainee, getTrainee, returns the correct trainee values")
+    public void givenValidTrainee_getTrainee_ReturnsCorrectTraineeValues(){
         boolean doesExist = false;
 
         tDAO.createTables();
@@ -116,12 +122,20 @@ public class TraineeDAOTest {
         assertTrue(doesExist);
     }
 
-    // getCentres
-    // insertCentre
+    @Test
+    @DisplayName("Given a invalid trainee, getTrainee, returns a null pointer exception")
+    public void givenInvalidTrainee_getTrainee_ReturnsNullPointerException(){
+        tDAO.createTables();
+        Trainee trainee = new Trainee(0, null, 0, 0, null, 0);
+        tDAO.insertTrainee(trainee);
+        ArrayList<Trainee> trainees = tDAO.getTrainees();
+
+        NullPointerException nEx = assertThrows(NullPointerException.class, () -> trainees.get(0).getTraineeCourse().equals("Java"));
+    }
 
     @Test
-    @DisplayName("insertCentre")
-    public void insertCentre() throws SQLException {
+    @DisplayName("Given a valid centre, insertCentre, inserts the record correctly in the centre database")
+    public void givenValidCentre_insertCentre_InsertsTheRecordCorrectly() throws SQLException {
         boolean doesExist = false;
         Statement st = tDAO.getConnection().createStatement();
 
@@ -144,8 +158,8 @@ public class TraineeDAOTest {
     }
 
     @Test
-    @DisplayName("getCentre")
-    public void getCentre(){
+    @DisplayName("Given a valid centre, getCentre, returns the correct centre values")
+    public void givenValidCentre_getCentre_ReturnsCorrectCentreValues(){
         boolean doesExist = false;
 
         tDAO.createTables();
@@ -161,12 +175,9 @@ public class TraineeDAOTest {
         assertTrue(doesExist);
     }
 
-    // getRequirements
-    // insertRequirements
-
     @Test
-    @DisplayName("insertRequirements")
-    public void insertRequirements() throws SQLException {
+    @DisplayName("Given a valid requirement, insertRequirement, inserts the record correctly in the requirement database")
+    public void givenValidRequirement_insertRequirement_InsertsTheRecordCorrectly() throws SQLException {
         boolean doesExist = false;
         Statement st = tDAO.getConnection().createStatement();
 
@@ -174,11 +185,7 @@ public class TraineeDAOTest {
         Client client = new Client(12, "state", "req", 2, 20);
         Requirement requirement = new Requirement(1, client);
 
-        System.out.println("Before insert");
-
         tDAO.insertRequirement(requirement);
-
-        System.out.println("inserted");
 
         ResultSet rs = st.executeQuery("SELECT * FROM requirements");
         while (rs.next()) {
@@ -193,8 +200,8 @@ public class TraineeDAOTest {
     }
 
     @Test
-    @DisplayName("getRequirements")
-    public void getRequirements(){
+    @DisplayName("Given a valid requirement, getRequirement, returns the correct centre values")
+    public void givenValidRequirement_getRequirement_ReturnsCorrectCentreValues(){
         boolean doesExist = false;
 
         tDAO.createTables();
@@ -209,5 +216,17 @@ public class TraineeDAOTest {
             doesExist = true;
 
         assertTrue(doesExist);
+    }
+
+    @Test
+    @DisplayName("Given a invalid requirement, getRequirement, returns a null pointer exception")
+    public void givenInvalidRequirement_getRequirement_ReturnsNullPointerException(){
+        tDAO.createTables();
+        Client client = new Client(0, null, null, 2, 20);
+        Requirement requirement = new Requirement(1, client);
+        tDAO.insertRequirement(requirement);
+        ArrayList<Requirement> requirements = tDAO.getRequirements();
+
+        NullPointerException nEx = assertThrows(NullPointerException.class, () -> requirements.get(0).getReqType().equals("type"));
     }
 }
