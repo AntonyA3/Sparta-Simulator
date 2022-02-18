@@ -17,8 +17,13 @@ public class Requirement {
         this.assignedTrainees = assignedTrainees;
     }
 
-    public Requirement(Client c) {
+    public Requirement(int reqID, Client c) {
+        this.reqID = reqID;
         this.clientID = c.getClientID();
+        this.reqType = c.getReqType();
+        this.reqStartMonth = c.getReqStartMonth();
+        this.reqQuantity = c.getReqQuantity();
+        this.assignedTrainees = 0;
     }
 
     public int getReqID() { return reqID; }
