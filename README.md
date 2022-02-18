@@ -78,7 +78,7 @@ After that, the user must find the project folder in the right directory so, it 
 * Using the program
 To start the simulation, the *Main* must be run. Then, the program will ask the user how long they want the simulation to be run:
 
-![](MISSING TO SHOW THE MIN-MAX MONTHS RANGE SHOWN ON THE TERMINAL)
+![howtouse5](https://user-images.githubusercontent.com/63067669/154674673-d9c45a80-2a86-439a-b910-48710fcce22e.png)
 
 The second question will be how the user wants the information to be displayed, monthly or at the end of the simulation:
 
@@ -86,7 +86,7 @@ The second question will be how the user wants the information to be displayed, 
 
 This should an example of the information displayed breakdown by type of course. This information should include *number of centres open, closed and full* and *trainees being trained and waiting to be trained*:
 
-![](IMAGE OF THE RESULTS DISPLAYED)
+![howtouse7](https://user-images.githubusercontent.com/63067669/154677735-1488274e-24b1-4f80-b0cf-d2e9053f6b6f.png)
 
 
 #### Creation phases
@@ -117,7 +117,6 @@ This project goes through 3 phases:
 #### Testing file reader & SQL data transfer.
 Tests covered different areas:
 * Different user inputs can be handled by the program, including edge cases.
-* The simulation works as expected and handles the information according to the requirements.
 * The connections between the program and IntelliJ works as expected and methods create tables, insert, update and retrieve data.
 * The Trainee Factory create new trainees and retrieve them as expected.
 * The Trainee class handles their information as expected.
@@ -125,7 +124,6 @@ Tests covered different areas:
 | Test Type       |                                                       Test Results                                                       |
 |-----------------|:------------------------------------------------------------------------------------------------------------------------:|
 | Input Parser    |                                                          ![]()                                                           |
-| Simulation      |                                                          ![]()                                                           |
 | Trainee DAO     |                                                          ![]()                                                           |
 | Trainee Factory |                                                          ![]()                                                           |
 | Trainee Test    |                                                          ![]()                                                           |
