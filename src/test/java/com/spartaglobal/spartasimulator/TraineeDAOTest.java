@@ -74,8 +74,8 @@ public class TraineeDAOTest {
     // insertTraineee
 
     @Test
-    @DisplayName("getTrainees")
-    public void getTrainees() throws SQLException {
+    @DisplayName("insertTrainees")
+    public void insertTrainees() throws SQLException {
         boolean doesExist = false;
         Statement st = tDAO.getConnection().createStatement();
 
@@ -98,8 +98,49 @@ public class TraineeDAOTest {
         assertTrue(doesExist);
     }
 
+    @Test
+    @DisplayName("getTrainees")
+    public void getTrainees(){
+        boolean doesExist = false;
+
+        tDAO.createTables();
+        Trainee trainee = new Trainee(32, Course.DEVOPS.name, 15, 2, "state", 4);
+        tDAO.insertTrainee(trainee);
+
+        ArrayList<Trainee> trainees = tDAO.getTrainees();
+
+        if (trainees.get(0).getTraineeID() == 32 && trainees.get(0).getTraineeCourse().equals("DevOps") &&
+                trainees.get(0).getCentreID() == 15 && trainees.get(0).getReqID() == 2 &&
+                trainees.get(0).getTrainingState().equals("state") && trainees.get(0).getMonthsTraining() == 4)
+            doesExist = true;
+
+        assertTrue(doesExist);
+    }
+
     // getCentres
     // insertCentre
+
+    @Test
+    @DisplayName("insertCentre")
+    public void insertCentre() throws SQLException {
+        boolean doesExist = false;
+        Statement st = tDAO.getConnection().createStatement();
+
+        tDAO.createTables();
+        TrainingCentre trainingHub = new TrainingHub(15, true);
+        tDAO.insertCentre(trainingHub);
+
+        ResultSet rs = st.executeQuery("SELECT * FROM training_centres");
+        while (rs.next()) {
+            int centreId = rs.getInt("centre_id");
+            String type = rs.getString("training_centre_type");
+            int capacity = rs.getInt("training_centre_capacity");
+            boolean isOpen = rs.getBoolean("training_centre_open");
+            if (centreId == 15 ) doesExist = true;
+        }
+        st.close();
+        assertTrue(doesExist);
+    }
 
     // getRequirements
     // insertRequirements
