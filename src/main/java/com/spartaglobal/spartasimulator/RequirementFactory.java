@@ -6,6 +6,10 @@ public class RequirementFactory {
 
     public RequirementFactory() { this.nextID = STARTING_ID; }
 
-    public Requirement makeRequirement(Client c) { return (new Requirement(nextID, c)); }
+    public Requirement makeRequirement(Client c) {
+        Requirement r = new Requirement(nextID, c);
+        nextID++;
+        return r;
+    }
 
 }
