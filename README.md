@@ -2,17 +2,17 @@
 
 ## Table of Contents:
 
-* [Summary](#summary)
-* [Pom Dependencies](#pom-dependencies)
-* [Properties file & Connecting to localhost](#properties-file--connecting-to-localhost)
-* [How to use the program](#how-to-use-the-program)
-* [Creation phases](#creation-phases)
-* [Testing file reader & SQL data transfer](#testing-file-reader--sql-data-transfer)
-* [Logging with Log4j](#logging-with-log4j)
-* [Project Management: Scrum](#project-management-scrum)
+* [Summary](#inssummaryins)
+* [Pom Dependencies](#inspom-dependenciesins)
+* [Properties file & Connecting to localhost](#insproperties-file--connecting-to-localhostins)
+* [How to use the program](#inshow-to-use-the-programins)
+* [Creation phases](#inscreation-phasesins)
+* [Testing file reader & SQL data transfer](#instesting-file-reader--sql-data-transferins)
+* [Logging with Log4j](#inslogging-with-log4jins)
+* [Project Management: Scrum](#insproject-management-scrumins)
 
 ### Sections
-#### Summary:</ins>
+#### <ins>Summary:</ins>
 This project is a Sparta simulator that checks the general performance of the company over different months under random circumstances. 
 The simulator generates a random number of *trainees, Sparta academy centres and clients* over a period of time chosen by the user in months. 
 Depending on how the company is doing, *centres* might close and *clients* might not require company services anymore.
