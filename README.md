@@ -124,12 +124,12 @@ Tests covered different areas:
 * The Trainee Factory create new trainees and retrieve them as expected.
 * The Trainee class handles their information as expected.
 
-| Test Type       |                                                       Test Results                                                       |
-|-----------------|:------------------------------------------------------------------------------------------------------------------------:|
-| Input Parser    |                                                          ![]()                                                           |
-| Trainee DAO     |                                                          ![]()                                                           |
-| Trainee Factory |                                                          ![]()                                                           |
-| Trainee Test    |                                                          ![]()                                                           |
+| Test Type       |                                                       Test Results                                                       | Test Coverage   |
+|-----------------|:------------------------------------------------------------------------------------------------------------------------:|-----------------|
+| Input Parser    |                                                          ![]()                                                           ||
+| Trainee DAO     |                                                          ![]()                                                           ||
+| Trainee Factory |                                                          ![]()                                                           ||
+| Trainee Test    |                                                          ![]()                                                           ||
 
 #### <ins>Logging with Log4j:</ins>
 We can check the program activity through *logging*. This can help the programmers to track the steps that the program follows until is completed. Furthermore, this can help to see if there is any potential issue when it's being run.
