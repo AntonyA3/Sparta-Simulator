@@ -43,9 +43,9 @@ public class TraineeDAO {
         Statement statement  = null;
         try {
             statement = this.connection.createStatement();
-            statement.executeUpdate("DROP TABLE IF EXISTS requirements;");
 
             statement.executeUpdate("DROP TABLE IF EXISTS trainees;");
+            statement.executeUpdate("DROP TABLE IF EXISTS requirements;");
             statement.executeUpdate("DROP TABLE IF EXISTS training_centres;");
             statement.executeUpdate("DROP TABLE IF EXISTS clients;");
 
@@ -53,11 +53,11 @@ public class TraineeDAO {
             //Create Training Centre Table
             String sql = """
                 CREATE TABLE training_centres(
-                    training_centre_id INT, 
+                    centre_id INT, 
                     training_centre_type VARCHAR(50),
                     training_centre_capacity INT, 
                     training_centre_open BIT,
-                    PRIMARY KEY (training_centre_id)
+                    PRIMARY KEY (centre_id)
                 )    
             """;
             statement.executeUpdate(sql);
@@ -84,8 +84,7 @@ public class TraineeDAO {
                         req_id INT,
                         training_state VARCHAR(50),
                         months_training int,
-                        PRIMARY KEY (trainee_id),
-                        FOREIGN KEY (centre_id) REFERENCES training_centres(training_centre_id)
+                        PRIMARY KEY (trainee_id)
                     );
             """;
             statement.executeUpdate(sql);
@@ -114,7 +113,7 @@ public class TraineeDAO {
     public void insertCentre(TrainingCentre trainingCentre) {
         String sql = """
             INSERT INTO training_centres
-            (training_centre_id, training_centre_type, training_centre_capacity, training_centre_open)
+            (centre_id, training_centre_type, training_centre_capacity, training_centre_open)
             VALUES(?, ?, ?, ?)       
         """;
         try{

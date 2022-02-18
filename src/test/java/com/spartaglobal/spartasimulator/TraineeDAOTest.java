@@ -31,7 +31,6 @@ public class TraineeDAOTest {
     public void insertClients() throws SQLException {    // Done
         boolean doesExist = false;
         Statement st = tDAO.getConnection().createStatement();
-
         tDAO.createTables();
         Client client = new Client(12, "state", "req", 2, 20);
         tDAO.insertClient(client);
