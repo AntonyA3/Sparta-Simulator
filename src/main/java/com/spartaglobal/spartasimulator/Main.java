@@ -8,8 +8,9 @@ import java.util.Scanner;
 
 public class Main {
     public static Logger logger;
-    private static final int MIN_MONTHS = 1;
-    private static final int MAX_MONTHS = 120;
+    public static final int MIN_MONTHS = 1;
+    public static final int MAX_MONTHS = 120;
+
 
     public static void main(String[] args) {
         TraineeDAO tdao = new TraineeDAO();
@@ -32,9 +33,8 @@ public class Main {
     }
 
     private static boolean getInfoGivenMonthly() {
-        boolean infoGivenMonthly;
         do{
-            switch(InputParser.parseOption(DisplayManager.promptUserInput(DisplayManager.Message.INFO_GIVEN_MONTHLY), new String[] {"M", "S"})) {
+            switch(InputParser.parseOption(DisplayManager.promptUserInput(DisplayManager.Message.DATA_CHOICE), new String[] {"M", "S"})) {
                 case "M" -> { return true; }
                 case "S" -> { return false; }
                 default -> DisplayManager.printMessage(DisplayManager.Message.INVALID_INPUT);

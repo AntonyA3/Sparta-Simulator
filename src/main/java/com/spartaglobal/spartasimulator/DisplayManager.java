@@ -2,25 +2,23 @@ package com.spartaglobal.spartasimulator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Arrays;
 import java.util.Scanner;
 
-public class DisplayManager {
 
+public class DisplayManager {
     private static Logger logger = LogManager.getLogger("Display Manager");
 
     public enum Message{
-        SIMULATION_START("Simulation starting."),
-        MONTHS("Please, enter the simulation length in months: "),
-        INFO_GIVEN_MONTHLY("Would you like the simulation to print information monthly (M), or only after the simulation ends (S)?"),
+        SIMULATION_START("Simulation starting"),
+        MONTHS(String.format("Please, enter the simulation length in months (Min. %d - Max. %d): ", Main.MIN_MONTHS, Main.MAX_MONTHS)),
         INVALID_INPUT("Invalid input."),
-        INVALID_INPUT_MONTHS("Invalid input. " + MONTHS.message),
-        TOTAL_MONTHS("Run the System for %d months."),
-        CENTRES_OPEN("Number of open centres open: %d"),
-        FULL_CENTRES("Number of full centres: %d"),
-        TRAINEES_TRAINING("Number of trainees currently training: %d"),
-        TRAINEES_WAITING("Number of trainees on the waiting list: %d"),
+        CURRENT_MONTH("------------------------- CURRENT MONTH - %d -------------------------"),
+        CENTRES_OPEN("-------------------- Number of open centres open --------------------"),
+        FULL_CENTRES("-------------------- Number of full centres --------------------"),
+        CLOSED_CENTRES("-------------------- Number of closed centres --------------------"),
+        TRAINEES_TRAINING("-------------------- Number of trainees currently training --------------------"),
+        TRAINEES_WAITING("-------------------- Number of trainees on the waiting list --------------------"),
+        DATA_CHOICE("Do you want to print the data each month (M) or after completing the simulation (S)?: "),
         SIMULATION_COMPLETE("Simulation complete");
         public final String message;
         Message(String message) {
@@ -43,12 +41,57 @@ public class DisplayManager {
         System.out.println(String.format(m.message, intValue));
     }
 
-    public static void printSystemInfo(TraineeDAO traineeDao){
-        System.out.println("Simulation Ended");
-        System.out.println(String.format(Message.CENTRES_OPEN.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t > 0)));
-        System.out.println(String.format(Message.FULL_CENTRES.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t == 0)));
-        System.out.println(String.format(Message.TRAINEES_TRAINING.message, traineeDao.getTrainingTrainees().size()));
-        System.out.println(String.format(Message.TRAINEES_WAITING.message, traineeDao.getWaitingTrainees(false)));
+    public static void printSystemInfo(TraineeDAO tdao, int month){
+        System.out.println(String.format(String.valueOf(Message.CURRENT_MONTH.message), month));
+        String[] typeOfCentres = new String[]{"BOOTCAMP", "TRAININGHUB", "TECHCENTRE"};
+        System.out.println(Message.CENTRES_OPEN.message);
+        for (String typeOfCentre : typeOfCentres) {
+            System.out.println(
+                typeOfCentre.substring(0, 1).toUpperCase() + typeOfCentre.substring(1).toLowerCase() + ": " +
+                tdao.getCentres().stream().
+                        filter(c -> c.getCentreType().equals(typeOfCentre)).
+                        filter(c -> c.getIsOpen() == true).
+                        filter(c -> c.getTrainingCentreCapacity() > 0)
+                        .count());
+        }
+        System.out.println(Message.FULL_CENTRES.message);
+        for (String typeOfCentre : typeOfCentres) {
+            System.out.println(
+                typeOfCentre.substring(0, 1).toUpperCase() + typeOfCentre.substring(1).toLowerCase() + ": " +
+                tdao.getCentres().stream().
+                        filter(c -> c.getCentreType().equals(typeOfCentre)).
+                        filter(c -> c.getIsOpen() == true).
+                        filter(c -> c.getTrainingCentreCapacity() == 0)
+                        .count());
+        }
+        System.out.println(Message.CLOSED_CENTRES.message);
+        for (String typeOfCentre : typeOfCentres) {
+            System.out.println(
+                typeOfCentre.substring(0, 1).toUpperCase() + typeOfCentre.substring(1).toLowerCase() + ": " +
+                tdao.getCentres().stream().
+                        filter(c -> c.getCentreType().equals(typeOfCentre))
+                        .filter(c -> c.getIsOpen() == false)
+                        .count());
+        }
+
+        System.out.println(Message.TRAINEES_TRAINING.message);
+        for (Course course : Course.values()) {
+            System.out.println(
+                course.name + ": " +
+                tdao.getTrainees().stream()
+                        .filter(t -> t.getTrainingState().equals("TRAINING"))
+                        .filter(t -> t.getTraineeCourse().equals(course.name))
+                        .count());;
+        }
+        System.out.println(Message.TRAINEES_WAITING.message);
+        for (Course course : Course.values()) {
+            System.out.println(
+                course.name + ": " +
+                tdao.getTrainees().stream()
+                        .filter(t -> t.getTrainingState().equals("WAITING"))
+                        .filter(t -> t.getTraineeCourse().equals(course.name))
+                        .count());;
+        }
     }
 
     public static void printException(Exception e){

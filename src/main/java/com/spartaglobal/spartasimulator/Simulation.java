@@ -19,14 +19,15 @@ public class Simulation {
         TraineeFactory tf = new TraineeFactory();
         TrainingCentreFactory tcf = new TrainingCentreFactory();
         ClientFactory cf = new ClientFactory();
+        RequirementFactory rf = new RequirementFactory();
         for(int i = 0; i < months; i++) {
-            loop(i, tdao, tf, tcf, cf);
-            if(infoGivenMonthly) DisplayManager.printSystemInfo(tdao);
+            loop(i, tdao, tf, tcf, cf, rf);
+            if(infoGivenMonthly) DisplayManager.printSystemInfo(tdao, i);
         }
-        if(!infoGivenMonthly) DisplayManager.printSystemInfo(tdao);
+        if(!infoGivenMonthly) DisplayManager.printSystemInfo(tdao, months);
     }
 
-    private static void loop(int month, TraineeDAO tdao, TraineeFactory tf, TrainingCentreFactory tcf, ClientFactory cf){
+    private static void loop(int month, TraineeDAO tdao, TraineeFactory tf, TrainingCentreFactory tcf, ClientFactory cf, RequirementFactory rf){
         TrainingCentre newCentre;
         if((month % 2) == 1) {
             do {
@@ -40,7 +41,7 @@ public class Simulation {
         tdao.getClients().stream()
                 .filter(c -> (c.getState().equals("HAPPY") && ((month - c.getReqStartMonth()) >= 12)))
                 .forEach(c -> {
-                    tdao.insertRequirement(new Requirement(c));
+                    tdao.insertRequirement(rf.makeRequirement(c));
                     c.setState("WAITING");
                     c.setReqStartMonth(month);
                     tdao.insertClient(c);

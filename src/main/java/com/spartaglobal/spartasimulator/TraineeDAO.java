@@ -4,7 +4,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Properties;
 
 public class TraineeDAO {
@@ -206,7 +205,7 @@ public class TraineeDAO {
 
     public ArrayList<Requirement> getRequirements() {
 
-        ArrayList<Requirement> requirements = new ArrayList<Requirement>();
+        ArrayList<Requirement> requirements = new ArrayList<>();
         String sql = """
             SELECT r.req_id, r.client_id, r.assigned_trainees, c.client_req_type, c.client_req_start_month, c.client_req_quantity
             FROM requirements r
