@@ -4,7 +4,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Properties;
 
 public class TraineeDAO {
@@ -96,7 +95,7 @@ public class TraineeDAO {
                        req_id   int,
                        client_id    int,
                        req_type     VARCHAR(50),
-                       req_start_mont   INT,
+                       req_start_month   INT,
                        req_quantity     INT,
                        assigned_trainees    INT   
                     );
@@ -206,7 +205,7 @@ public class TraineeDAO {
     }
 
     public ArrayList<Requirement> getRequirements() {
-        ArrayList<Requirement> requirements = new ArrayList<Requirement>();
+        ArrayList<Requirement> requirements = new ArrayList<>();
         String sql = """
             SELECT req_id, client_id, req_type, req_start_month, req_quantity, assigned_trainees     
             FROM requirements;
@@ -276,9 +275,9 @@ public class TraineeDAO {
         String sql = """
                 INSERT INTO clients
                 (client_id, client_state, client_req_type, client_req_start_month, client_req_quantity)
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE 
-                client_state = ?, client_req_type = ? 
+                client_state = ?, client_req_type = ?, 
                 client_req_start_month = ?, client_req_quantity = ?;
         """;
 

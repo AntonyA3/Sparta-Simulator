@@ -21,9 +21,9 @@ public class Simulation {
         ClientFactory cf = new ClientFactory();
         for(int i = 0; i < months; i++) {
             loop(i, tdao, tf, tcf, cf);
-            if(infoGivenMonthly) DisplayManager.printSystemInfo(tdao);
+            if(infoGivenMonthly) DisplayManager.printSystemInfo(tdao, i);
         }
-        if(!infoGivenMonthly) DisplayManager.printSystemInfo(tdao);
+        if(!infoGivenMonthly) DisplayManager.printSystemInfo(tdao, months);
     }
 
     private static void loop(int month, TraineeDAO tdao, TraineeFactory tf, TrainingCentreFactory tcf, ClientFactory cf){

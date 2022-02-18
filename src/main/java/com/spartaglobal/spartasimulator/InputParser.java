@@ -18,6 +18,6 @@ public class InputParser {
 
     public static String parseOption(String s, String[] options){
         for(String o : options) if(o.equalsIgnoreCase(s)) return o; // else
-        return null;
+        return "INVALID";
     }
 }

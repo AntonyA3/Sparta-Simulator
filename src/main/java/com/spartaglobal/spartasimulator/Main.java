@@ -33,7 +33,6 @@ public class Main {
     }
 
     private static boolean getInfoGivenMonthly() {
-        boolean infoGivenMonthly;
         do{
             switch(InputParser.parseOption(DisplayManager.promptUserInput(DisplayManager.Message.DATA_CHOICE), new String[] {"M", "S"})) {
                 case "M" -> { return true; }
