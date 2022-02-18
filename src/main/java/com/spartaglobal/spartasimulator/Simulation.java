@@ -62,8 +62,12 @@ public class Simulation {
                     tdao.insertClient(c);
                 });
 
-
-        if((month >= 12) && (rand.nextDouble() < CLIENT_CREATION_CHANCE)) tdao.insertClient(cf.makeClient(month));
+        // make new client and corresponding requirement
+        if((month >= 12) && (rand.nextDouble() < CLIENT_CREATION_CHANCE)) {
+            Client newClient = cf.makeClient(month);
+            tdao.insertClient(newClient);
+            tdao.insertRequirement(rf.makeRequirement(newClient));
+        }
 
         // trainees that have been training for three months become benched
         tdao.getTrainees("WHERE months_training >= 3 AND training_state = 'TRAINING'").stream()
@@ -188,7 +192,7 @@ public class Simulation {
     }
 
     /**
-     * Unassigns all trainees assign to the given client's current requirement.
+     * Unassigns all trainees assigned to the given client's current requirement.
      * @param c The client for which to retrieve the current requirement of.
      * @param tdao The object through which the simulation accesses the database.
      */
