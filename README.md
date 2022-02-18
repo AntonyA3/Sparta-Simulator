@@ -19,9 +19,9 @@ Depending on how the company is doing, *centres* might close and *clients* might
 However, new *centres* are open every two months and new *clients* can contract Sparta's services.
 #### <ins>Pom Dependencies:</ins>
 The dependencies used for this project are:
-* org.junit.jupiter:5.8.2 - For testing.
-* org.apache.logging.log4j:2.17.1 - For logging.
-* mysql:8.0.25 - For database connection and update.
+* [org.junit.jupiter:5.8.2](https://junit.org/junit5/) - For testing.
+* [org.apache.logging.log4j:2.17.1](https://logging.apache.org/log4j/2.x/) - For logging.
+* [mysql:8.0.25](https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-installing-maven.html) - For database connection and update.
 #### <ins>MySQL Set up:</ins>
 The approach for this project was to follow the Data Access Object ([DAO](https://www.oracle.com/java/technologies/dataaccessobject.html)) design pattern to abstract and encapsulate all access to the data source. This design pattern manages the connection with the data source to obtain and store data. It implements the access mechanism required to work with the data source.
 
@@ -48,11 +48,11 @@ The mySQL dependency is used with all its associated methods to work on *Intelli
 
 The *TraineeDAO's openConnection()* method creates the connection between the IntelliJ and MySQL after passing the information from the *mysql.properties* file:
 
-````properties
+```properties
 dburl=jdbc:mysql://localhost:3306/trainees
 dbuserid=root
 dbpassword=[MYSQL_SERVER_PASSWORD]
-````
+```
 
 Once the connection is set, the program will work on the *TraineeDAO* instance created during the simulation. This will allow performing actions through the methods provided in that Class such as retrieving information or updating the database.
 
@@ -61,11 +61,11 @@ Once the connection is set, the program will work on the *TraineeDAO* instance c
 
 The first thing the user has to do is download the compressed project on GitHub as shown:
 
-![howtouse1](https://user-images.githubusercontent.com/63067669/154333191-fa3512c7-066e-4cf0-ad7d-44d4fda11d28.png)
+![howtouse1](https://user-images.githubusercontent.com/63067669/154701030-2057f34b-aef4-46f6-9556-cc89218d7037.png)
 
 Once is in the local machine, it has to be extracted to be used:
 
-![howtouse2](https://user-images.githubusercontent.com/63067669/154333384-35635ef5-a15b-49ea-8f27-e338ba578555.png)
+![howtouse2](https://user-images.githubusercontent.com/63067669/154701127-fb301512-b1e6-4bcf-bbca-bc3aa6a05e11.png)
 
 Then, the user has to open the file in their local program. In this case, it's being used *IntelliJ* to run the program:
 
@@ -76,6 +76,7 @@ After that, the user must find the project folder in the right directory so, it 
 ![howtouse4](https://user-images.githubusercontent.com/63067669/154334431-25306a8b-27c7-45cd-be32-9390f868d04b.png)
 
 * Using the program
+
 To start the simulation, the *Main* must be run. Then, the program will ask the user how long they want the simulation to be run:
 
 ![howtouse5](https://user-images.githubusercontent.com/63067669/154674673-d9c45a80-2a86-439a-b910-48710fcce22e.png)
@@ -84,7 +85,7 @@ The second question will be how the user wants the information to be displayed, 
 
 ![howtouse6](https://user-images.githubusercontent.com/63067669/154339732-9bd89e8c-6752-4ffb-bf6c-a43340d7b883.png)
 
-This should an example of the information displayed breakdown by type of course. This information should include *number of centres open, closed and full* and *trainees being trained and waiting to be trained*:
+This should be an example of the information displayed breakdown by type of course. This should include *number of centres open, closed and full* and *trainees being trained and waiting to be trained*:
 
 ![howtouse7](https://user-images.githubusercontent.com/63067669/154677735-1488274e-24b1-4f80-b0cf-d2e9053f6b6f.png)
 
@@ -93,12 +94,13 @@ This should an example of the information displayed breakdown by type of course.
 
 This project goes through 3 phases:
 
-* Phase 1 - Setting-up the simulation
+* Phase 1 - Setting-up the simulation:
   * The simulation will ask for how long the user wants to run it.
   * A random number of trainees are generated **every month** and, they are distributed among the different centres depending on their capacity. If there is no room for them in any centre, they will be moved to a waiting list and following the **[FIFO](https://en.wikipedia.org/wiki/FIFO_and_LIFO_accounting)** system.
   * A new training centre is open **every two months** and can train up to **100 trainees**.
 
-* Phase 2 - Adding new centres and type of courses
+
+* Phase 2 - Adding new centres and type of courses:
   * The simulation should now offer the choice of data at the end of the simulation or a running output updated each month.
   * The information displayed is separated by:
     * Number of centres open, closed and full (breakdown for each type).
@@ -109,7 +111,8 @@ This project goes through 3 phases:
     * <ins>Bootcamp</ins>: Can train up to 500 trainees. This centre can close if attendance is **fewer than 25** trainees after **three months**. Only **two** Bootcamps can be open at a time.
     * <ins>Tech Centre</ins>: Can train up to 200 trainees but only teaches one course at a time. The course taught is random selected.
 
-* Phase 3 - Clients
+
+* Phase 3 - Clients:
   * Clients will begin to be randomly created after **one year** of simulation. And they will have a minimum requirement of **15** trainees in one speciality.
   * A client will take a random number of trainees trained from one up to full requirement. If the client's needs are satisfied within a year, they will renew the contract, if not they won't do it.
   * If a trainee has been in training for **three months**, they are suitable to be placed into a client.
