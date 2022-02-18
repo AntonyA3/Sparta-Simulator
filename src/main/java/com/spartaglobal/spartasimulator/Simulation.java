@@ -62,8 +62,12 @@ public class Simulation {
                     tdao.insertClient(c);
                 });
 
-
-        if((month >= 12) && (rand.nextDouble() < CLIENT_CREATION_CHANCE)) tdao.insertClient(cf.makeClient(month));
+        // make new client and corresponding requirement
+        if((month >= 12) && (rand.nextDouble() < CLIENT_CREATION_CHANCE)) {
+            Client newClient = cf.makeClient(month);
+            tdao.insertClient(newClient);
+            tdao.insertRequirement(rf.makeRequirement(newClient));
+        }
 
         // trainees that have been training for three months become benched
         tdao.getTrainees("WHERE months_training >= 3 AND training_state = 'TRAINING'").stream()
