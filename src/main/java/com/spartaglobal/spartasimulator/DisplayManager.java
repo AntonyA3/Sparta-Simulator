@@ -46,52 +46,56 @@ public class DisplayManager {
         String[] typeOfCentres = new String[]{"BOOTCAMP", "TRAININGHUB", "TECHCENTRE"};
         System.out.println(Message.CENTRES_OPEN.message);
         for (String typeOfCentre : typeOfCentres) {
-            System.out.println(
+            System.out.print(
                 typeOfCentre.substring(0, 1).toUpperCase() + typeOfCentre.substring(1).toLowerCase() + ": " +
                 tdao.getCentres().stream().
                         filter(c -> c.getCentreType().equals(typeOfCentre)).
                         filter(c -> c.getIsOpen() == true).
                         filter(c -> c.getTrainingCentreCapacity() > 0)
-                        .count());
+                        .count() + " ");
         }
+        System.out.println("\n");
         System.out.println(Message.FULL_CENTRES.message);
         for (String typeOfCentre : typeOfCentres) {
-            System.out.println(
+            System.out.print(
                 typeOfCentre.substring(0, 1).toUpperCase() + typeOfCentre.substring(1).toLowerCase() + ": " +
                 tdao.getCentres().stream().
                         filter(c -> c.getCentreType().equals(typeOfCentre)).
                         filter(c -> c.getIsOpen() == true).
                         filter(c -> c.getTrainingCentreCapacity() == 0)
-                        .count());
+                        .count()  + " ");
         }
+        System.out.println("\n");
         System.out.println(Message.CLOSED_CENTRES.message);
         for (String typeOfCentre : typeOfCentres) {
-            System.out.println(
+            System.out.print(
                 typeOfCentre.substring(0, 1).toUpperCase() + typeOfCentre.substring(1).toLowerCase() + ": " +
                 tdao.getCentres().stream().
                         filter(c -> c.getCentreType().equals(typeOfCentre))
                         .filter(c -> c.getIsOpen() == false)
-                        .count());
+                        .count() + " ");
         }
-
+        System.out.println("\n");
         System.out.println(Message.TRAINEES_TRAINING.message);
         for (Course course : Course.values()) {
-            System.out.println(
+            System.out.print(
                 course.name + ": " +
                 tdao.getTrainees().stream()
                         .filter(t -> t.getTrainingState().equals("TRAINING"))
                         .filter(t -> t.getTraineeCourse().equals(course.name))
-                        .count());;
+                        .count() + " ");
         }
+        System.out.println("\n");
         System.out.println(Message.TRAINEES_WAITING.message);
         for (Course course : Course.values()) {
-            System.out.println(
+            System.out.print(
                 course.name + ": " +
                 tdao.getTrainees().stream()
                         .filter(t -> t.getTrainingState().equals("WAITING"))
                         .filter(t -> t.getTraineeCourse().equals(course.name))
-                        .count());;
+                        .count() + " ");
         }
+        System.out.println("\n");
     }
 
     public static void printException(Exception e){
