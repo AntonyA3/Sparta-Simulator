@@ -15,6 +15,12 @@ public class Simulation {
     private static final double CLIENT_CREATION_CHANCE = 0.5;
     private static final Random rand = new Random();
 
+    /**
+     * Carries out the simulation.
+     * @param months How many months the simulation should run for.
+     * @param infoGivenMonthly Whether the simulation should print information monthly (true) or after the entire simulation (false)
+     * @param tdao The object through which the simulation accesses the database.
+     */
     public static void simulate(int months, boolean infoGivenMonthly, TraineeDAO tdao){
         TraineeFactory tf = new TraineeFactory();
         TrainingCentreFactory tcf = new TrainingCentreFactory();
@@ -27,6 +33,15 @@ public class Simulation {
         if(!infoGivenMonthly) DisplayManager.printSystemInfo(tdao, months);
     }
 
+    /**
+     * Carries out one loop of the simulation.
+     * @param month Which month the simulation is on.
+     * @param tdao The object through which the simulation accesses the database.
+     * @param tf Factory object for creating new trainees.
+     * @param tcf Factory object for creating new training centres.
+     * @param cf Factory object for creating new clients.
+     * @param rf Factory object for creating new requirements.
+     */
     private static void loop(int month, TraineeDAO tdao, TraineeFactory tf, TrainingCentreFactory tcf, ClientFactory cf, RequirementFactory rf){
         TrainingCentre newCentre;
         if((month % 2) == 1) {
@@ -113,6 +128,11 @@ public class Simulation {
                 .forEach(t -> t.incrementMonthsTraining());
     }
 
+    /**
+     * Checks if the maximum number of boot camps already exists in the simulation.
+     * @param tdao The object through which the simulation accesses the database.
+     * @return true if the maximum number of boot camps already exists.
+     */
     private static boolean maxBootCampsExist(TraineeDAO tdao) {
         return (tdao.getCentres().stream()
                 .filter(c -> (c instanceof BootCamp))
@@ -120,6 +140,11 @@ public class Simulation {
                 .count() >= MAX_BOOT_CAMPS);
     }
 
+    /**
+     * Assigns a given trainee to a valid requirement.
+     * @param t The trainee to be assigned.
+     * @param tdao The object through which the simulation accesses the database.
+     */
     private static void assignTraineeToReq(Trainee t, TraineeDAO tdao) {
         Requirement firstValidReq = tdao.getRequirements().stream()
                 .filter(r -> r.getReqType().equals(t.getTraineeCourse()))
@@ -136,12 +161,24 @@ public class Simulation {
         }
     }
 
+    /**
+     * Retrieves the given client's current requirement.
+     * @param c The client for which to find the current requirement.
+     * @param tdao The object through which the simulation accesses the database.
+     * @return The client's current requirement.
+     */
     private static Requirement getCurrentReq(Client c, TraineeDAO tdao) {
         return tdao.getRequirements().stream()
                 .filter(r -> (r.getClientID() == c.getClientID()))
                 .max(Comparator.comparing(Requirement::getReqID)).orElse(null);
     }
 
+    /**
+     * Checks if the client's current requirement has been met.
+     * @param c The client for which to check the requirement of.
+     * @param tdao The object through which the simulation accesses the database.
+     * @return Whether the client's requirement has been met (true) or not (false)
+     */
     private static boolean isRequirementMet(Client c, TraineeDAO tdao) {
         Requirement currentReq = getCurrentReq(c, tdao);
         if(currentReq != null) {
@@ -149,6 +186,11 @@ public class Simulation {
         } else return true; // this should never be possible
     }
 
+    /**
+     * Unassigns all trainees assign to the given client's current requirement.
+     * @param c The client for which to retrieve the current requirement of.
+     * @param tdao The object through which the simulation accesses the database.
+     */
     private static void unassignTraineesFromReq(Client c, TraineeDAO tdao) {
         int currentReqID = getCurrentReq(c, tdao).getReqID();
         tdao.getTrainees().stream()
@@ -159,6 +201,11 @@ public class Simulation {
                 });
     }
 
+    /**
+     * Assigns the given trainee to the first valid training centre.
+     * @param t The trainee to assign to a training centre.
+     * @param tdao The object through which the simulation accesses the database.
+     */
     private static void assignTraineeToCentre(Trainee t, TraineeDAO tdao) {
         ArrayList<TrainingCentre> nonFullCentres = new ArrayList<>(tdao.getCentres().stream()
                 .filter(c -> !isCentreFull(c, tdao))
@@ -180,18 +227,37 @@ public class Simulation {
         }
     }
 
+    /**
+     * Checks whether or not the given training centre is full.
+     * @param tc The training centre for which to check the fullness of.
+     * @param tdao The object through which the simulation accesses the database.
+     * @return Whether the training centre is full (true) or not (false).
+     */
     private static boolean isCentreFull(TrainingCentre tc, TraineeDAO tdao) {
         return (tdao.getTrainees().stream()
                 .filter(t -> t.getCentreID().equals(tc.getTrainingCentreID()))
                 .count() >= tc.getTrainingCentreCapacity()); // should never be greater than
     }
 
+    /**
+     * Checks whether or not the given training centre is low attendance.
+     * @param tc The training centre for which to check the attendance of.
+     * @param tdao The object through which the simulation accesses the database.
+     * @return Whether the training centre is low attendance (true) or not (false).
+     */
     private static boolean isCentreLowAttendance(TrainingCentre tc, TraineeDAO tdao) {
         return (tdao.getTrainees().stream()
                 .filter(t -> t.getCentreID().equals(tc.getTrainingCentreID()))
                 .count() < CENTRE_ATTENDANCE_THRESHOLD);
     }
 
+    /**
+     * If the given training centre is a boot camp, checks how long it has been low-attendance,
+     * closing it if it's the third consecutive month of low attendance or incrementing the count for it otherwise.
+     * If the given training centre is not a boot camp, it closes it.
+     * @param tc The training centre to possibly close.
+     * @param tdao The object through which the simulation accesses the database.
+     */
     private static void closeCentreOrIncrementMonths(TrainingCentre tc, TraineeDAO tdao) {
         if(tc instanceof BootCamp) {
             if(((BootCamp) tc).getMonthsBelowThreshold() > 2) tc.setIsOpen(false);
@@ -200,6 +266,12 @@ public class Simulation {
         tdao.insertCentre(tc);
     }
 
+    /**
+     * Checks whether the given trainee is in a closed centre or not.
+     * @param t The trainee to check the centre status of.
+     * @param tdao The object through which the simulation accesses the database.
+     * @return Whether the trainee is in a closed centre (true) or not (false).
+     */
     private static boolean inClosedCentre(Trainee t, TraineeDAO tdao) {
         TrainingCentre tc = tdao.getCentres().stream()
                 .filter(c -> (c.getTrainingCentreID() == t.getCentreID()))

@@ -43,8 +43,9 @@ public class TraineeDAO {
         try {
             statement = this.connection.createStatement();
 
-            statement.executeUpdate("DROP TABLE IF EXISTS trainees;");
             statement.executeUpdate("DROP TABLE IF EXISTS requirements;");
+            statement.executeUpdate("DROP TABLE IF EXISTS trainees;");
+
             statement.executeUpdate("DROP TABLE IF EXISTS training_centres;");
             statement.executeUpdate("DROP TABLE IF EXISTS clients;");
 
@@ -56,6 +57,8 @@ public class TraineeDAO {
                     training_centre_type VARCHAR(50),
                     training_centre_capacity INT, 
                     training_centre_open BIT,
+                    months_below_threshold INT, 
+                    course VARCHAR (50),
                     PRIMARY KEY (centre_id)
                 )    
             """;
@@ -88,13 +91,20 @@ public class TraineeDAO {
             """;
             statement.executeUpdate(sql);
 
+
+            sql = """
+                SET FOREIGN_KEY_CHECKS=0;
+            """;
+            statement.executeUpdate(sql);
+
             //Create Requirements Table
             sql = """
                     CREATE TABLE requirements (
-                       req_id   int,
-                       client_id    int,
+                       req_id   INT,
+                       client_id    INT,
                        assigned_trainees  INT,
                        FOREIGN KEY (client_id) REFERENCES clients(client_id)
+
                     );
             """;
             statement.executeUpdate(sql);
@@ -110,8 +120,8 @@ public class TraineeDAO {
     public void insertCentre(TrainingCentre trainingCentre) {
         String sql = """
             INSERT INTO training_centres
-            (centre_id, training_centre_type, training_centre_capacity, training_centre_open)
-            VALUES(?, ?, ?, ?)       
+            (centre_id, training_centre_type, training_centre_capacity, training_centre_open, months_below_threshold, course)
+            VALUES(?, ?, ?, ?, ?, ?)       
         """;
         try{
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -119,6 +129,22 @@ public class TraineeDAO {
             preparedStatement.setString(2, trainingCentre.getCentreType());
             preparedStatement.setInt(3, trainingCentre.getTrainingCentreCapacity());
             preparedStatement.setBoolean(4, trainingCentre.getIsOpen());
+
+            switch (trainingCentre.getCentreType()){
+                case "TRAININGHUB" ->{
+                    preparedStatement.setInt(5, 0);
+                    preparedStatement.setString(6, null);
+                }
+                case "BOOTCAMP" -> {
+                    preparedStatement.setInt(5, ((BootCamp)trainingCentre).getMonthsBelowThreshold());
+                    preparedStatement.setString(6, null);
+                }
+                case "TECHCENTRE" ->{
+                    preparedStatement.setInt(5, 0);
+                    preparedStatement.setString(6, ((TechCentre)trainingCentre).getCourse());
+                }
+            }
+
             preparedStatement.executeUpdate();
         }catch (SQLException e){
 
@@ -186,15 +212,25 @@ public class TraineeDAO {
 
 
         String sql = """
-            SELECT centre_id, training_centre_type, training_centre_capacity, training_centre_open
+            SELECT centre_id, training_centre_type, training_centre_capacity, training_centre_open,  months_below_threshold, course
             FROM training_centres;
         """;
         try{
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()){
-                TrainingCentre trainingCentre = new TrainingCentreFactory().makeCentre(rs.getString("training_centre_type"));
-                trainingCentre.setIsOpen(rs.getBoolean("training_centre_open"));
+                TrainingCentre trainingCentre = null;
+                int centreId = rs.getInt("centre_id");
+                String trainingCentreType = rs.getString("training_centre_type");
+                boolean trainingCentreOpen = rs.getBoolean("training_centre_open");
+                int monthsBelowThreshold = rs.getInt("months_below_threshold");
+                String course = rs.getString("course");
+
+                switch (trainingCentreType){
+                    case "TRAININGHUB" -> trainingCentre = new TrainingHub(centreId, trainingCentreOpen);
+                    case "BOOTCAMP" -> trainingCentre = new BootCamp(centreId, trainingCentreOpen, monthsBelowThreshold);
+                    case "TECHCENTRE" -> trainingCentre = new TechCentre(centreId, trainingCentreOpen, course);
+                }
                 trainingCentres.add(trainingCentre);
             }
         } catch (SQLException e) {
@@ -209,7 +245,7 @@ public class TraineeDAO {
         String sql = """
             SELECT r.req_id, r.client_id, r.assigned_trainees, c.client_req_type, c.client_req_start_month, c.client_req_quantity
             FROM requirements r
-            INNER JOIN clients c
+            LEFT JOIN clients c
             ON r.client_id = c.client_id;
         """;
 
@@ -243,7 +279,7 @@ public class TraineeDAO {
             (req_id, client_id, assigned_trainees)
             VALUES (?, ?, ?) 
             ON DUPLICATE KEY UPDATE
-            client_id = ?, req_type = ?, 
+            client_id = ?, 
             assigned_trainees = ?;
         """;
 
@@ -252,12 +288,9 @@ public class TraineeDAO {
             preparedStatement.setInt(1,requirement.getReqID());
             preparedStatement.setInt(2, requirement.getClientID());
             preparedStatement.setInt(3, requirement.getAssignedTrainees());
-
-            preparedStatement.setInt(4,requirement.getReqID());
-            preparedStatement.setInt(5, requirement.getClientID());
-            preparedStatement.setInt(6, requirement.getAssignedTrainees());
-
-            preparedStatement.executeUpdate();
+            preparedStatement.setInt(4, requirement.getClientID());
+            preparedStatement.setInt(5, requirement.getAssignedTrainees());
+            int update =preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
