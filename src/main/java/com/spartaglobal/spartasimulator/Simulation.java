@@ -19,31 +19,30 @@ public class Simulation {
      * Carries out the simulation.
      * @param months How many months the simulation should run for.
      * @param infoGivenMonthly Whether the simulation should print information monthly (true) or after the entire simulation (false)
-     * @param tdao The object through which the simulation accesses the database.
      */
-    public static void simulate(int months, boolean infoGivenMonthly, TraineeDAO tdao){
+    public static void simulate(int months, boolean infoGivenMonthly){
         TraineeFactory tf = new TraineeFactory();
         TrainingCentreFactory tcf = new TrainingCentreFactory();
         ClientFactory cf = new ClientFactory();
         RequirementFactory rf = new RequirementFactory();
         for(int i = 0; i < months; i++) {
-            loop(i, tdao, tf, tcf, cf, rf);
-            if(infoGivenMonthly) DisplayManager.printSystemInfo(tdao, i);
-            System.gc();
+            loop(i, tf, tcf, cf, rf);
+            if(infoGivenMonthly) DisplayManager.printSystemInfo(i);
         }
-        if(!infoGivenMonthly) DisplayManager.printSystemInfo(tdao, months);
+        if(!infoGivenMonthly) DisplayManager.printSystemInfo(months);
     }
 
     /**
      * Carries out one loop of the simulation.
      * @param month Which month the simulation is on.
-     * @param tdao The object through which the simulation accesses the database.
      * @param tf Factory object for creating new trainees.
      * @param tcf Factory object for creating new training centres.
      * @param cf Factory object for creating new clients.
      * @param rf Factory object for creating new requirements.
      */
-    private static void loop(int month, TraineeDAO tdao, TraineeFactory tf, TrainingCentreFactory tcf, ClientFactory cf, RequirementFactory rf){
+    private static void loop(int month, TraineeFactory tf, TrainingCentreFactory tcf, ClientFactory cf, RequirementFactory rf){
+        TraineeDAO tdao = new TraineeDAO();
+        tdao.openConnection();
         TrainingCentre newCentre;
         if((month % 2) == 1) {
             do {
@@ -127,6 +126,7 @@ public class Simulation {
         tdao.getTrainees("WHERE training_state = 'TRAINING'").stream()
                 //.filter(t -> t.getTrainingState().equals("TRAINING"))
                 .forEach(t -> t.incrementMonthsTraining());
+        tdao.closeConnection();
     }
 
     /**
