@@ -43,9 +43,9 @@ public class TraineeDAO {
         Statement statement  = null;
         try {
             statement = this.connection.createStatement();
-            statement.executeUpdate("DROP TABLE IF EXISTS requirements;");
 
             statement.executeUpdate("DROP TABLE IF EXISTS trainees;");
+            statement.executeUpdate("DROP TABLE IF EXISTS requirements;");
             statement.executeUpdate("DROP TABLE IF EXISTS training_centres;");
             statement.executeUpdate("DROP TABLE IF EXISTS clients;");
 
@@ -53,11 +53,11 @@ public class TraineeDAO {
             //Create Training Centre Table
             String sql = """
                 CREATE TABLE training_centres(
-                    training_centre_id INT, 
+                    centre_id INT, 
                     training_centre_type VARCHAR(50),
                     training_centre_capacity INT, 
                     training_centre_open BIT,
-                    PRIMARY KEY (training_centre_id)
+                    PRIMARY KEY (centre_id)
                 )    
             """;
             statement.executeUpdate(sql);
@@ -79,13 +79,12 @@ public class TraineeDAO {
             sql = """
                     CREATE TABLE trainees (
                         trainee_id INT, 
-                        centre_id INT,
                         course VARCHAR(50),
+                        centre_id INT,
                         req_id INT,
                         training_state VARCHAR(50),
                         months_training int,
-                        PRIMARY KEY (trainee_id),
-                        FOREIGN KEY (centre_id) REFERENCES training_centres(training_centre_id)
+                        PRIMARY KEY (trainee_id)
                     );
             """;
             statement.executeUpdate(sql);
@@ -114,7 +113,7 @@ public class TraineeDAO {
     public void insertCentre(TrainingCentre trainingCentre) {
         String sql = """
             INSERT INTO training_centres
-            (training_centre_id, training_centre_type, training_centre_capacity, training_centre_open)
+            (centre_id, training_centre_type, training_centre_capacity, training_centre_open)
             VALUES(?, ?, ?, ?)       
         """;
         try{
@@ -276,9 +275,9 @@ public class TraineeDAO {
         String sql = """
                 INSERT INTO clients
                 (client_id, client_state, client_req_type, client_req_start_month, client_req_quantity)
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE 
-                client_state = ?, client_req_type = ? 
+                client_state = ?, client_req_type = ?, 
                 client_req_start_month = ?, client_req_quantity = ?;
         """;
 
@@ -307,7 +306,7 @@ public class TraineeDAO {
     public void insertTrainee(Trainee t) {
         String sql = """
             INSERT INTO trainees
-            (trainee_id, centre_id, course, req_id, training_state, months_training )
+            (trainee_id, course, centre_id, req_id, training_state, months_training )
             VALUES (?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE
             centre_id = ?, course = ?, 
@@ -317,8 +316,8 @@ public class TraineeDAO {
         try{
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, t.getTraineeID());
-            preparedStatement.setObject(2, t.getCentreID());
-            preparedStatement.setString(3, t.getTraineeCourse());
+            preparedStatement.setString(2, t.getTraineeCourse());
+            preparedStatement.setObject(3, t.getCentreID());
             preparedStatement.setObject(4, t.getReqID());
             preparedStatement.setString(5, t.getTrainingState());
             preparedStatement.setInt(6, t.getMonthsTraining());
@@ -334,4 +333,19 @@ public class TraineeDAO {
         }
     }
 
+    public int[] getCentreCapacities() {
+        return null;
+    }
+
+    public ArrayList<Trainee> getTrainingTrainees() {
+        return null;
+    }
+
+    public ArrayList<Trainee> getWaitingTrainees(boolean b) {
+        return null;
+    }
+
+    public Connection getConnection() {
+        return this.connection;
+    }
 }

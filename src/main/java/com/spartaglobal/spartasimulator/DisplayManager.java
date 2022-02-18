@@ -46,8 +46,8 @@ public class DisplayManager {
     public static void printSystemInfo(TraineeDAO traineeDao){
         System.out.println(String.format(Message.CENTRES_OPEN.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t > 0)));
         System.out.println(String.format(Message.FULL_CENTRES.message, Arrays.stream(traineeDao.getCentreCapacities()).filter(t -> t == 0)));
-        System.out.println(String.format(Message.TRAINEES_TRAINING.message, traineeDao.getTrainingTrainees().length));
-        System.out.println(String.format(Message.TRAINEES_WAITING.message, traineeDao.getWaitingTrainees(false).length));
+        System.out.println(String.format(Message.TRAINEES_TRAINING.message, traineeDao.getTrainingTrainees().size()));
+        System.out.println(String.format(Message.TRAINEES_WAITING.message, traineeDao.getWaitingTrainees(false)));
     }
 
     public static void printException(Exception e){
