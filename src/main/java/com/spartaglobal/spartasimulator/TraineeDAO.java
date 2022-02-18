@@ -187,7 +187,7 @@ public class TraineeDAO {
     public ArrayList<TrainingCentre> getCentres() {
         ArrayList<TrainingCentre> trainingCentres = new ArrayList<>();
         String sql = """
-            SELECT training_centre_id, training_centre_type, training_centre_capacity, training_centre_open
+            SELECT centre_id, training_centre_type, training_centre_capacity, training_centre_open
             FROM training_centres;
         """;
         try{
