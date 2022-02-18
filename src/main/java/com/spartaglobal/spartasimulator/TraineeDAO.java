@@ -93,10 +93,8 @@ public class TraineeDAO {
                     CREATE TABLE requirements (
                        req_id   int,
                        client_id    int,
-                       req_type     VARCHAR(50),
-                       req_start_month   INT,
-                       req_quantity     INT,
-                       assigned_trainees    INT   
+                       assigned_trainees  INT,
+                       FOREIGN KEY (client_id) REFERENCES clients(client_id)
                     );
             """;
             statement.executeUpdate(sql);
@@ -185,6 +183,8 @@ public class TraineeDAO {
 
     public ArrayList<TrainingCentre> getCentres() {
         ArrayList<TrainingCentre> trainingCentres = new ArrayList<>();
+
+
         String sql = """
             SELECT centre_id, training_centre_type, training_centre_capacity, training_centre_open
             FROM training_centres;
@@ -204,10 +204,13 @@ public class TraineeDAO {
     }
 
     public ArrayList<Requirement> getRequirements() {
+
         ArrayList<Requirement> requirements = new ArrayList<>();
         String sql = """
-            SELECT req_id, client_id, req_type, req_start_month, req_quantity, assigned_trainees     
-            FROM requirements;
+            SELECT r.req_id, r.client_id, r.assigned_trainees, c.client_req_type, c.client_req_start_month, c.client_req_quantity
+            FROM requirements r
+            INNER JOIN clients c
+            ON r.client_id = c.client_id;
         """;
 
         try{
@@ -217,9 +220,9 @@ public class TraineeDAO {
             while (rs.next()){
                 int reqId = rs.getInt("req_id");
                 int clientId = rs.getInt("client_id");
-                String reqType = rs.getString("req_type");
-                int reqStartMonth = rs.getInt("req_start_month");
-                int reqQuantity = rs.getInt("req_quantity");
+                String reqType = rs.getString("client_req_type");
+                int reqStartMonth = rs.getInt("client_req_start_month");
+                int reqQuantity = rs.getInt("client_req_quantity");
                 int assignedTrainees = rs.getInt("assigned_trainees");
                 Requirement requirement = new Requirement(reqId, clientId, reqType, reqStartMonth, reqQuantity, assignedTrainees);
                 requirements.add(requirement);
@@ -237,11 +240,10 @@ public class TraineeDAO {
     public void insertRequirement(Requirement requirement) {
         String sql = """
             INSERT INTO requirements
-            (req_id, client_id, req_type, req_start_month, req_quantity, assigned_trainees)
-            VALUES (?, ?, ?, ?, ?, ?) 
+            (req_id, client_id, assigned_trainees)
+            VALUES (?, ?, ?) 
             ON DUPLICATE KEY UPDATE
             client_id = ?, req_type = ?, 
-            req_start_month = ?, req_quantity = ?, 
             assigned_trainees = ?;
         """;
 
@@ -249,16 +251,12 @@ public class TraineeDAO {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1,requirement.getReqID());
             preparedStatement.setInt(2, requirement.getClientID());
-            preparedStatement.setString(3, requirement.getReqType());
-            preparedStatement.setInt(4, requirement.getReqStartMonth());
-            preparedStatement.setInt(5, requirement.getReqQuantity());
+            preparedStatement.setInt(3, requirement.getAssignedTrainees());
+
+            preparedStatement.setInt(4,requirement.getReqID());
+            preparedStatement.setInt(5, requirement.getClientID());
             preparedStatement.setInt(6, requirement.getAssignedTrainees());
 
-            preparedStatement.setInt(7, requirement.getClientID());
-            preparedStatement.setString(8, requirement.getReqType());
-            preparedStatement.setInt(9, requirement.getReqStartMonth());
-            preparedStatement.setInt(10, requirement.getReqQuantity());
-            preparedStatement.setInt(11, requirement.getAssignedTrainees());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
