@@ -12,17 +12,17 @@
 * [Project Management: Scrum](#project-management-scrum)
 
 ### Sections
-#### Summary
+#### Summary:</ins>
 This project is a Sparta simulator that checks the general performance of the company over different months under random circumstances. 
 The simulator generates a random number of *trainees, Sparta academy centres and clients* over a period of time chosen by the user in months. 
 Depending on how the company is doing, *centres* might close and *clients* might not require company services anymore.
 However, new *centres* are open every two months and new *clients* can contract Sparta's services.
-#### Pom Dependencies
+#### <ins>Pom Dependencies:</ins>
 The dependencies used for this project are:
 * org.junit.jupiter:5.8.2 - For testing.
 * org.apache.logging.log4j:2.17.1 - For logging.
 * mysql:8.0.25 - For database connection and update.
-#### MySQL Set up
+#### <ins>MySQL Set up:</ins>
 The approach for this project was to follow the Data Access Object ([DAO](https://www.oracle.com/java/technologies/dataaccessobject.html)) design pattern to abstract and encapsulate all access to the data source. This design pattern manages the connection with the data source to obtain and store data. It implements the access mechanism required to work with the data source.
 
 ![DAOPattern](https://user-images.githubusercontent.com/63067669/153708510-bd39862b-3fc2-4c08-8252-ab804d9d527e.png)  
@@ -34,7 +34,7 @@ In order to have access to the database, the database has to be created first. F
 CREATE DATABASE IF NOT EXISTS trainees;
 USE trainees;
 ```
-#### Properties file & Connecting to localhost
+#### <ins>Properties file & Connecting to localhost:</ins>
 
 The mySQL dependency is used with all its associated methods to work on *IntelliJ*:
 
@@ -56,7 +56,7 @@ dbpassword=[MYSQL_SERVER_PASSWORD]
 
 Once the connection is set, the program will work on the *TraineeDAO* instance created during the simulation. This will allow performing actions through the methods provided in that Class such as retrieving information or updating the database.
 
-#### How to use the program
+#### <ins>How to use the program:</ins>
 * Project download & set-up
 
 The first thing the user has to do is download the compressed project on GitHub as shown:
@@ -89,7 +89,7 @@ This should an example of the information displayed breakdown by type of course.
 ![howtouse7](https://user-images.githubusercontent.com/63067669/154677735-1488274e-24b1-4f80-b0cf-d2e9053f6b6f.png)
 
 
-#### Creation phases
+#### <ins>Creation phases:</ins>
 
 This project goes through 3 phases:
 
@@ -114,7 +114,7 @@ This project goes through 3 phases:
   * A client will take a random number of trainees trained from one up to full requirement. If the client's needs are satisfied within a year, they will renew the contract, if not they won't do it.
   * If a trainee has been in training for **three months**, they are suitable to be placed into a client.
     
-#### Testing file reader & SQL data transfer.
+#### <ins>Testing file reader & SQL data transfer:</ins>
 Tests covered different areas:
 * Different user inputs can be handled by the program, including edge cases.
 * The connections between the program and IntelliJ works as expected and methods create tables, insert, update and retrieve data.
@@ -128,11 +128,11 @@ Tests covered different areas:
 | Trainee Factory |                                                          ![]()                                                           |
 | Trainee Test    |                                                          ![]()                                                           |
 
-#### Logging with Log4j
+#### <ins>Logging with Log4j:</ins>
 We can check the program activity through *logging*. This can help the programmers to track the steps that the program follows until is completed. Furthermore, this can help to see if there is any potential issue when it's being run.
 
 ![]()
 
-#### Project Management: Scrum
+#### <ins>Project Management: Scrum</ins>
 
 
