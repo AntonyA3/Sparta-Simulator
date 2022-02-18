@@ -180,12 +180,15 @@ public class TraineeDAO {
         return clients;
     }
 
-    public ArrayList<Trainee> getTrainees() {
+    public ArrayList<Trainee> getTrainees() { return getTrainees(""); }
+
+
+    public ArrayList<Trainee> getTrainees(String where) {
         ArrayList<Trainee> trainees = new ArrayList<>();
         String sql = """
             SELECT trainee_id, course, centre_id, req_id, training_state, months_training
-            FROM trainees;
-        """;
+            FROM trainees 
+        """ + where + ";";
         try{
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             ResultSet rs = preparedStatement.executeQuery();
