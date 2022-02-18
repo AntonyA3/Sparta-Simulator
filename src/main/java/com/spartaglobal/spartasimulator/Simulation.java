@@ -29,6 +29,7 @@ public class Simulation {
         for(int i = 0; i < months; i++) {
             loop(i, tdao, tf, tcf, cf, rf);
             if(infoGivenMonthly) DisplayManager.printSystemInfo(tdao, i);
+            System.gc();
         }
         if(!infoGivenMonthly) DisplayManager.printSystemInfo(tdao, months);
     }
