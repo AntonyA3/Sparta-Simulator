@@ -43,8 +43,9 @@ public class TraineeDAO {
         try {
             statement = this.connection.createStatement();
 
-            statement.executeUpdate("DROP TABLE IF EXISTS trainees;");
             statement.executeUpdate("DROP TABLE IF EXISTS requirements;");
+            statement.executeUpdate("DROP TABLE IF EXISTS trainees;");
+
             statement.executeUpdate("DROP TABLE IF EXISTS training_centres;");
             statement.executeUpdate("DROP TABLE IF EXISTS clients;");
 
@@ -90,13 +91,20 @@ public class TraineeDAO {
             """;
             statement.executeUpdate(sql);
 
+
+            sql = """
+                SET FOREIGN_KEY_CHECKS=0;
+            """;
+            statement.executeUpdate(sql);
+
             //Create Requirements Table
             sql = """
                     CREATE TABLE requirements (
-                       req_id   int,
-                       client_id    int,
+                       req_id   INT,
+                       client_id    INT,
                        assigned_trainees  INT,
                        FOREIGN KEY (client_id) REFERENCES clients(client_id)
+
                     );
             """;
             statement.executeUpdate(sql);
@@ -237,7 +245,7 @@ public class TraineeDAO {
         String sql = """
             SELECT r.req_id, r.client_id, r.assigned_trainees, c.client_req_type, c.client_req_start_month, c.client_req_quantity
             FROM requirements r
-            INNER JOIN clients c
+            LEFT JOIN clients c
             ON r.client_id = c.client_id;
         """;
 
@@ -271,7 +279,7 @@ public class TraineeDAO {
             (req_id, client_id, assigned_trainees)
             VALUES (?, ?, ?) 
             ON DUPLICATE KEY UPDATE
-            client_id = ?, req_type = ?, 
+            client_id = ?, 
             assigned_trainees = ?;
         """;
 
@@ -280,12 +288,9 @@ public class TraineeDAO {
             preparedStatement.setInt(1,requirement.getReqID());
             preparedStatement.setInt(2, requirement.getClientID());
             preparedStatement.setInt(3, requirement.getAssignedTrainees());
-
-            preparedStatement.setInt(4,requirement.getReqID());
-            preparedStatement.setInt(5, requirement.getClientID());
-            preparedStatement.setInt(6, requirement.getAssignedTrainees());
-
-            preparedStatement.executeUpdate();
+            preparedStatement.setInt(4, requirement.getClientID());
+            preparedStatement.setInt(5, requirement.getAssignedTrainees());
+            int update =preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
