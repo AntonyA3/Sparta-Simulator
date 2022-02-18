@@ -41,7 +41,9 @@ public class DisplayManager {
         System.out.println(String.format(m.message, intValue));
     }
 
-    public static void printSystemInfo(TraineeDAO tdao, int month){
+    public static void printSystemInfo(int month){
+        TraineeDAO tdao = new TraineeDAO();
+        tdao.openConnection();
         System.out.println(String.format(String.valueOf(Message.CURRENT_MONTH.message), month));
         String[] typeOfCentres = new String[]{"BOOTCAMP", "TRAININGHUB", "TECHCENTRE"};
         System.out.println(Message.CENTRES_OPEN.message);
@@ -96,6 +98,7 @@ public class DisplayManager {
                         .count() + " ");
         }
         System.out.println("\n");
+        tdao.closeConnection();
     }
 
     public static void printException(Exception e){
