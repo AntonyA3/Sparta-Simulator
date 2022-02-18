@@ -150,15 +150,11 @@ public class TraineeDAOTest {
 
         tDAO.createTables();
         TrainingCentre trainingHub = new TrainingHub(0, true);
-        TrainingCentre trainingHub1 = new TrainingHub(1, false);
         tDAO.insertCentre(trainingHub);
-        tDAO.insertCentre(trainingHub1);
 
         ArrayList<TrainingCentre> centres = tDAO.getCentres();
 
-        System.out.println(centres.get(1).getTrainingCentreID() + " " + centres.get(0).getCentreType() + " " + centres.get(0).getTrainingCentreCapacity() + " " + centres.get(0).getIsOpen());
-
-        if (centres.get(1).getTrainingCentreID() == 0 && centres.get(0).getCentreType().equals("TRAININGHUB")
+        if (centres.get(0).getTrainingCentreID() == 0 && centres.get(0).getCentreType().equals("TRAININGHUB")
                 && centres.get(0).getTrainingCentreCapacity() == 100 && centres.get(0).getIsOpen() == true)
             doesExist = true;
 
@@ -167,4 +163,51 @@ public class TraineeDAOTest {
 
     // getRequirements
     // insertRequirements
+
+    @Test
+    @DisplayName("insertRequirements")
+    public void insertRequirements() throws SQLException {
+        boolean doesExist = false;
+        Statement st = tDAO.getConnection().createStatement();
+
+        tDAO.createTables();
+        Client client = new Client(12, "state", "req", 2, 20);
+        Requirement requirement = new Requirement(1, client);
+
+        System.out.println("Before insert");
+
+        tDAO.insertRequirement(requirement);
+
+        System.out.println("inserted");
+
+        ResultSet rs = st.executeQuery("SELECT * FROM requirements");
+        while (rs.next()) {
+            int requirementId = rs.getInt("req_id");
+            int clientId = rs.getInt("client_id");
+            int assignedTrainees = rs.getInt("assigned_trainees");
+            if (requirementId == 1 && clientId == 12 && assignedTrainees == 0);
+                doesExist = true;
+        }
+        st.close();
+        assertTrue(doesExist);
+    }
+
+    @Test
+    @DisplayName("getRequirements")
+    public void getRequirements(){
+        boolean doesExist = false;
+
+        tDAO.createTables();
+        Client client = new Client(12, "state", "req", 2, 20);
+        Requirement requirement = new Requirement(1, client);
+        tDAO.insertRequirement(requirement);
+
+        ArrayList<Requirement> requirements = tDAO.getRequirements();
+
+        if (requirements.get(0).getReqID() == 1 && requirements.get(0).getClientID() == 12
+                && requirements.get(0).getAssignedTrainees() == 0)
+            doesExist = true;
+
+        assertTrue(doesExist);
+    }
 }
