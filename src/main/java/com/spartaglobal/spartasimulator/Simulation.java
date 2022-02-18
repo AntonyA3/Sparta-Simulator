@@ -66,8 +66,8 @@ public class Simulation {
         if((month >= 12) && (rand.nextDouble() < CLIENT_CREATION_CHANCE)) tdao.insertClient(cf.makeClient(month));
 
         // trainees that have been training for three months become benched
-        tdao.getTrainees().stream()
-                .filter(t -> ((t.getMonthsTraining() >= 3) && (t.getTrainingState().equals("TRAINING"))))
+        tdao.getTrainees("WHERE months_training >= 3 AND training_state = 'TRAINING'").stream()
+                //.filter(t -> ((t.getMonthsTraining() >= 3) && (t.getTrainingState().equals("TRAINING"))))
                 .forEach(t -> {
                     t.setTrainingState("BENCH");
                     tdao.insertTrainee(t);
@@ -75,8 +75,8 @@ public class Simulation {
         // get benched trainees
         // get waiting clients ordered by wait time
         // for each benched trainee, try to assign to a client, with priority to clients earlier in list
-        tdao.getTrainees().stream()
-                .filter(t -> (t.getTrainingState().equals("BENCH")))
+        tdao.getTrainees("WHERE training_state = 'BENCH'").stream()
+                //.filter(t -> (t.getTrainingState().equals("BENCH")))
                 .forEach(t -> assignTraineeToReq(t, tdao));
         // set clients with requirements met to "happy"
         tdao.getClients().stream()
@@ -94,8 +94,8 @@ public class Simulation {
                     unassignTraineesFromReq(c, tdao);
                 });
 
-        tdao.getTrainees().stream()
-                .filter(t -> t.getTrainingState().equals("WAITING"))
+        tdao.getTrainees("WHERE training_state = 'WAITING'").stream()
+                //.filter(t -> t.getTrainingState().equals("WAITING"))
                 .forEach(t -> assignTraineeToCentre(t, tdao));
 
 
@@ -118,13 +118,13 @@ public class Simulation {
                     tdao.insertCentre(c);
                 });
 
-        tdao.getTrainees().stream()
-                .filter(t -> t.getTrainingState().equals("TRAINING"))
+        tdao.getTrainees("WHERE training_state = 'TRAINING'").stream()
+                //.filter(t -> t.getTrainingState().equals("TRAINING"))
                 .filter(t -> inClosedCentre(t, tdao))
                 .forEach(t -> assignTraineeToCentre(t, tdao));
 
-        tdao.getTrainees().stream()
-                .filter(t -> t.getTrainingState().equals("TRAINING"))
+        tdao.getTrainees("WHERE training_state = 'TRAINING'").stream()
+                //.filter(t -> t.getTrainingState().equals("TRAINING"))
                 .forEach(t -> t.incrementMonthsTraining());
     }
 
@@ -193,8 +193,8 @@ public class Simulation {
      */
     private static void unassignTraineesFromReq(Client c, TraineeDAO tdao) {
         int currentReqID = getCurrentReq(c, tdao).getReqID();
-        tdao.getTrainees().stream()
-                .filter(t -> (t.getReqID() == currentReqID))
+        tdao.getTrainees(String.format("WHERE req_id = %d", currentReqID)).stream()
+                //.filter(t -> (t.getReqID() == currentReqID))
                 .forEach(t -> {
                     t.setReqID(null);
                     tdao.insertTrainee(t);
@@ -234,8 +234,8 @@ public class Simulation {
      * @return Whether the training centre is full (true) or not (false).
      */
     private static boolean isCentreFull(TrainingCentre tc, TraineeDAO tdao) {
-        return (tdao.getTrainees().stream()
-                .filter(t -> t.getCentreID().equals(tc.getTrainingCentreID()))
+        return (tdao.getTrainees(String.format("WHERE centre_id = %d", tc.getTrainingCentreID())).stream()
+                //.filter(t -> t.getCentreID().equals(tc.getTrainingCentreID()))
                 .count() >= tc.getTrainingCentreCapacity()); // should never be greater than
     }
 
@@ -246,8 +246,8 @@ public class Simulation {
      * @return Whether the training centre is low attendance (true) or not (false).
      */
     private static boolean isCentreLowAttendance(TrainingCentre tc, TraineeDAO tdao) {
-        return (tdao.getTrainees().stream()
-                .filter(t -> t.getCentreID().equals(tc.getTrainingCentreID()))
+        return (tdao.getTrainees(String.format("WHERE centre_id = %d", tc.getTrainingCentreID())).stream()
+                //.filter(t -> t.getCentreID().equals(tc.getTrainingCentreID()))
                 .count() < CENTRE_ATTENDANCE_THRESHOLD);
     }
 
