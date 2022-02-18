@@ -42,8 +42,7 @@ public class TraineeDAOTest {
             String clientReqType = rs.getString("client_req_type");
             int startMonth = rs.getInt("client_req_start_month");
             int reqQuantity = rs.getInt("client_req_quantity");
-            /*System.out.println(clientId + " " + clientState + " " + clientReqType + " " +
-                    startMonth + " " + reqQuantity);*/
+
             if (clientId == 12 && clientState.equals("state") && clientReqType.equals("req")
                     && startMonth == 2 && reqQuantity == 20) doesExist = true;
         }
@@ -62,9 +61,9 @@ public class TraineeDAOTest {
 
         ArrayList<Client> clients = tDAO.getClients();
 
-        if (clients.get(0).getClientID() == 12 && clients.get(0).getState().equals("state") &&
-        clients.get(0).getReqType().equals("req") && clients.get(0).getReqStartMonth() == 2 &&
-        clients.get(0).getReqQuantity() == 20)
+        if (clients.get(0).getClientID() == 12 && clients.get(0).getState().equals("state")
+                && clients.get(0).getReqType().equals("req") && clients.get(0).getReqStartMonth() == 2
+                && clients.get(0).getReqQuantity() == 20)
             doesExist = true;
 
         assertTrue(doesExist);
@@ -136,9 +135,33 @@ public class TraineeDAOTest {
             String type = rs.getString("training_centre_type");
             int capacity = rs.getInt("training_centre_capacity");
             boolean isOpen = rs.getBoolean("training_centre_open");
-            if (centreId == 15 ) doesExist = true;
+            if (centreId == 15 && type.equals("TRAININGHUB") && capacity == 100
+                    && isOpen == true)
+                doesExist = true;
         }
         st.close();
+        assertTrue(doesExist);
+    }
+
+    @Test
+    @DisplayName("getCentre")
+    public void getCentre(){
+        boolean doesExist = false;
+
+        tDAO.createTables();
+        TrainingCentre trainingHub = new TrainingHub(0, true);
+        TrainingCentre trainingHub1 = new TrainingHub(1, false);
+        tDAO.insertCentre(trainingHub);
+        tDAO.insertCentre(trainingHub1);
+
+        ArrayList<TrainingCentre> centres = tDAO.getCentres();
+
+        System.out.println(centres.get(1).getTrainingCentreID() + " " + centres.get(0).getCentreType() + " " + centres.get(0).getTrainingCentreCapacity() + " " + centres.get(0).getIsOpen());
+
+        if (centres.get(1).getTrainingCentreID() == 0 && centres.get(0).getCentreType().equals("TRAININGHUB")
+                && centres.get(0).getTrainingCentreCapacity() == 100 && centres.get(0).getIsOpen() == true)
+            doesExist = true;
+
         assertTrue(doesExist);
     }
 
