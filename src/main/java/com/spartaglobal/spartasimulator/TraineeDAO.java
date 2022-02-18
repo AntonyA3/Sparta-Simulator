@@ -103,6 +103,7 @@ public class TraineeDAO {
                        req_id   INT,
                        client_id    INT,
                        assigned_trainees  INT,
+                       PRIMARY KEY (req_id),
                        FOREIGN KEY (client_id) REFERENCES clients(client_id)
 
                     );
