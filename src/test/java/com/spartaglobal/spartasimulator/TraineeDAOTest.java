@@ -13,22 +13,22 @@ public class TraineeDAOTest {
 
     private static TraineeDAO tDAO;
 
-    @BeforeAll
-    public static void setUp(){
-        tDAO = new TraineeDAO();
-        tDAO.openConnection();
-    }
-
-    @AfterAll
-    public static void close(){
-        tDAO.closeConnection();
-    }
-
-    @Test
-    @DisplayName("Given creating a database table, createTable, should not throw an exception")
-    public void givenCreatingATable_createTable_DoesNotThrowException(){    // Done
-        assertDoesNotThrow(() -> tDAO.createTables());
-    }
+//    @BeforeAll
+//    public static void setUp(){
+//        tDAO = new TraineeDAO();
+//        tDAO.openConnection();
+//    }
+//
+//    @AfterAll
+//    public static void close(){
+//        tDAO.closeConnection();
+//    }
+//
+//    @Test
+//    @DisplayName("Given creating a database table, createTable, should not throw an exception")
+//    public void givenCreatingATable_createTable_DoesNotThrowException(){    // Done
+//        assertDoesNotThrow(() -> tDAO.createTables());
+//    }
 //
 //    @Test
 //    @DisplayName("Given adding a trainee in the table, addTrainee, should add the trainee in the database")
