@@ -16,10 +16,11 @@ public class Main {
         TraineeDAO tdao = new TraineeDAO();
         tdao.openConnection();
         tdao.createTables();
+        tdao.closeConnection();
         int months = getMonths();
         boolean infoGivenMonthly = getInfoGivenMonthly();
         DisplayManager.printMessage(DisplayManager.Message.SIMULATION_START, months);
-        Simulation.simulate(months, infoGivenMonthly, tdao);
+        Simulation.simulate(months, infoGivenMonthly);
         DisplayManager.printMessage(DisplayManager.Message.SIMULATION_COMPLETE);
     }
 
