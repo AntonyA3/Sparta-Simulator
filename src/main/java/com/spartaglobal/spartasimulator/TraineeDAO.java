@@ -56,6 +56,8 @@ public class TraineeDAO {
                     training_centre_type VARCHAR(50),
                     training_centre_capacity INT, 
                     training_centre_open BIT,
+                    months_below_threshold INT, 
+                    course VARCHAR (50),
                     PRIMARY KEY (centre_id)
                 )    
             """;
@@ -93,10 +95,8 @@ public class TraineeDAO {
                     CREATE TABLE requirements (
                        req_id   int,
                        client_id    int,
-                       req_type     VARCHAR(50),
-                       req_start_month   INT,
-                       req_quantity     INT,
-                       assigned_trainees    INT   
+                       assigned_trainees  INT,
+                       FOREIGN KEY (client_id) REFERENCES clients(client_id)
                     );
             """;
             statement.executeUpdate(sql);
@@ -112,8 +112,8 @@ public class TraineeDAO {
     public void insertCentre(TrainingCentre trainingCentre) {
         String sql = """
             INSERT INTO training_centres
-            (centre_id, training_centre_type, training_centre_capacity, training_centre_open)
-            VALUES(?, ?, ?, ?)       
+            (centre_id, training_centre_type, training_centre_capacity, training_centre_open, months_below_threshold, course)
+            VALUES(?, ?, ?, ?, ?, ?)       
         """;
         try{
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -121,6 +121,22 @@ public class TraineeDAO {
             preparedStatement.setString(2, trainingCentre.getCentreType());
             preparedStatement.setInt(3, trainingCentre.getTrainingCentreCapacity());
             preparedStatement.setBoolean(4, trainingCentre.getIsOpen());
+
+            switch (trainingCentre.getCentreType()){
+                case "TRAININGHUB" ->{
+                    preparedStatement.setInt(5, 0);
+                    preparedStatement.setString(6, null);
+                }
+                case "BOOTCAMP" -> {
+                    preparedStatement.setInt(5, ((BootCamp)trainingCentre).getMonthsBelowThreshold());
+                    preparedStatement.setString(6, null);
+                }
+                case "TECHCENTRE" ->{
+                    preparedStatement.setInt(5, 0);
+                    preparedStatement.setString(6, ((TechCentre)trainingCentre).getCourse());
+                }
+            }
+
             preparedStatement.executeUpdate();
         }catch (SQLException e){
 
@@ -185,16 +201,28 @@ public class TraineeDAO {
 
     public ArrayList<TrainingCentre> getCentres() {
         ArrayList<TrainingCentre> trainingCentres = new ArrayList<>();
+
+
         String sql = """
-            SELECT centre_id, training_centre_type, training_centre_capacity, training_centre_open
+            SELECT centre_id, training_centre_type, training_centre_capacity, training_centre_open,  months_below_threshold, course
             FROM training_centres;
         """;
         try{
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()){
-                TrainingCentre trainingCentre = new TrainingCentreFactory().makeCentre(rs.getString("training_centre_type"));
-                trainingCentre.setIsOpen(rs.getBoolean("training_centre_open"));
+                TrainingCentre trainingCentre = null;
+                int centreId = rs.getInt("centre_id");
+                String trainingCentreType = rs.getString("training_centre_type");
+                boolean trainingCentreOpen = rs.getBoolean("training_centre_open");
+                int monthsBelowThreshold = rs.getInt("months_below_threshold");
+                String course = rs.getString("course");
+
+                switch (trainingCentreType){
+                    case "TRAININGHUB" -> trainingCentre = new TrainingHub(centreId, trainingCentreOpen);
+                    case "BOOTCAMP" -> trainingCentre = new BootCamp(centreId, trainingCentreOpen, monthsBelowThreshold);
+                    case "TECHCENTRE" -> trainingCentre = new TechCentre(centreId, trainingCentreOpen, course);
+                }
                 trainingCentres.add(trainingCentre);
             }
         } catch (SQLException e) {
@@ -204,10 +232,13 @@ public class TraineeDAO {
     }
 
     public ArrayList<Requirement> getRequirements() {
+
         ArrayList<Requirement> requirements = new ArrayList<>();
         String sql = """
-            SELECT req_id, client_id, req_type, req_start_month, req_quantity, assigned_trainees     
-            FROM requirements;
+            SELECT r.req_id, r.client_id, r.assigned_trainees, c.client_req_type, c.client_req_start_month, c.client_req_quantity
+            FROM requirements r
+            INNER JOIN clients c
+            ON r.client_id = c.client_id;
         """;
 
         try{
@@ -217,9 +248,9 @@ public class TraineeDAO {
             while (rs.next()){
                 int reqId = rs.getInt("req_id");
                 int clientId = rs.getInt("client_id");
-                String reqType = rs.getString("req_type");
-                int reqStartMonth = rs.getInt("req_start_month");
-                int reqQuantity = rs.getInt("req_quantity");
+                String reqType = rs.getString("client_req_type");
+                int reqStartMonth = rs.getInt("client_req_start_month");
+                int reqQuantity = rs.getInt("client_req_quantity");
                 int assignedTrainees = rs.getInt("assigned_trainees");
                 Requirement requirement = new Requirement(reqId, clientId, reqType, reqStartMonth, reqQuantity, assignedTrainees);
                 requirements.add(requirement);
@@ -237,11 +268,10 @@ public class TraineeDAO {
     public void insertRequirement(Requirement requirement) {
         String sql = """
             INSERT INTO requirements
-            (req_id, client_id, req_type, req_start_month, req_quantity, assigned_trainees)
-            VALUES (?, ?, ?, ?, ?, ?) 
+            (req_id, client_id, assigned_trainees)
+            VALUES (?, ?, ?) 
             ON DUPLICATE KEY UPDATE
             client_id = ?, req_type = ?, 
-            req_start_month = ?, req_quantity = ?, 
             assigned_trainees = ?;
         """;
 
@@ -249,16 +279,12 @@ public class TraineeDAO {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1,requirement.getReqID());
             preparedStatement.setInt(2, requirement.getClientID());
-            preparedStatement.setString(3, requirement.getReqType());
-            preparedStatement.setInt(4, requirement.getReqStartMonth());
-            preparedStatement.setInt(5, requirement.getReqQuantity());
+            preparedStatement.setInt(3, requirement.getAssignedTrainees());
+
+            preparedStatement.setInt(4,requirement.getReqID());
+            preparedStatement.setInt(5, requirement.getClientID());
             preparedStatement.setInt(6, requirement.getAssignedTrainees());
 
-            preparedStatement.setInt(7, requirement.getClientID());
-            preparedStatement.setString(8, requirement.getReqType());
-            preparedStatement.setInt(9, requirement.getReqStartMonth());
-            preparedStatement.setInt(10, requirement.getReqQuantity());
-            preparedStatement.setInt(11, requirement.getAssignedTrainees());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
