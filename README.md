@@ -124,14 +124,14 @@ Tests covered different areas:
 * The Trainee Factory create new trainees and retrieve them as expected.
 * The Trainee class handles their information as expected.
 
-| Test Type       |                                                          Test Results                                                           | Test Coverage |
-|-----------------|:-------------------------------------------------------------------------------------------------------------------------------:|---------------|
-| Client          |     ![ClientResults](https://user-images.githubusercontent.com/63067669/154776407-8e49e6eb-76a9-4819-9e00-a9a5bf3cc41f.png)     |        ![ClientTestCoverage](https://user-images.githubusercontent.com/63067669/154776402-4e8a7cef-1730-4efe-9882-52c859bf2f60.png)      |
-| Course          |     ![CourseResults](https://user-images.githubusercontent.com/63067669/154776657-901f979a-9971-4967-8f8e-3076cf624f9e.png)     |        ![CourseCoverage](https://user-images.githubusercontent.com/63067669/154776660-6c6414cb-66ff-4f99-a587-77df7adcb548.png)      |
-| Input Parser    |                                                              ![]()                                                              |               |
-| Trainee DAO     |   ![TraineeDAOResults](https://user-images.githubusercontent.com/63067669/154777416-c954ca94-e2e1-4239-aca9-d7f93f1fa64e.png)   |        ![TraineeDAOCoverage](https://user-images.githubusercontent.com/63067669/154777417-6b64207b-f01c-4574-a574-f37dcd374e67.png)       |
-| Trainee Factory | ![TraineeFactoryResults](https://user-images.githubusercontent.com/63067669/154777619-5dfa488b-dd2c-4607-ba92-019b4686a1fc.png) |        ![TraineeFactoryCoverage](https://user-images.githubusercontent.com/63067669/154777623-c4284c7f-860c-4201-a310-ebd46432997e.png)      |
-| Trainee Test    |    ![TraineeResults](https://user-images.githubusercontent.com/63067669/154777839-f2e14bb9-32a6-472a-b7e4-44d87211bece.png)     |        ![TraineeCoverage](https://user-images.githubusercontent.com/63067669/154777841-a41f8393-430c-45ca-9873-b9fbd5568d9a.png)       |
+| Test Type       |                                                          Test Results                                                           | Test Coverage                                                                                                                    |
+|-----------------|:-------------------------------------------------------------------------------------------------------------------------------:|----------------------------------------------------------------------------------------------------------------------------------|
+| Client          |     ![ClientResults](https://user-images.githubusercontent.com/63067669/154776407-8e49e6eb-76a9-4819-9e00-a9a5bf3cc41f.png)     | ![ClientTestCoverage](https://user-images.githubusercontent.com/63067669/154778500-8d6b42de-9249-4a5c-b378-1d7e9b1f6403.png)     |
+| Course          |     ![CourseResults](https://user-images.githubusercontent.com/63067669/154776657-901f979a-9971-4967-8f8e-3076cf624f9e.png)     | ![CourseCoverage](https://user-images.githubusercontent.com/63067669/154778496-23df487f-2eb3-4c8e-977d-0df1b0f576ab.png)         |
+| Input Parser    |                                                              ![]()                                                              |                                                                                                                                  |
+| Trainee DAO     |   ![TraineeDAOResults](https://user-images.githubusercontent.com/63067669/154777416-c954ca94-e2e1-4239-aca9-d7f93f1fa64e.png)   | ![TraineeDAOCoverage](https://user-images.githubusercontent.com/63067669/154778498-da872986-4151-4d7e-a8c1-4f728a77bfea.png)     |
+| Trainee Factory | ![TraineeFactoryResults](https://user-images.githubusercontent.com/63067669/154777619-5dfa488b-dd2c-4607-ba92-019b4686a1fc.png) | ![TraineeFactoryCoverage](https://user-images.githubusercontent.com/63067669/154778499-3d4ad999-2e45-468f-9d0b-7a370414498a.png) |
+| Trainee Test    |    ![TraineeResults](https://user-images.githubusercontent.com/63067669/154777839-f2e14bb9-32a6-472a-b7e4-44d87211bece.png)     |  ![TraineeCoverage](https://user-images.githubusercontent.com/63067669/154778497-36417ab1-299b-4701-bef0-a4a82f2bfff4.png)       |
 
 #### <ins>Logging with Log4j:</ins>
 We can check the program activity through *logging*. This can help the programmers to track the steps that the program follows until is completed. Furthermore, this can help to see if there is any potential issue when it's being run.
@@ -139,5 +139,4 @@ We can check the program activity through *logging*. This can help the programme
 ![]()
 
 #### <ins>Project Management: Scrum</ins>
-
 
