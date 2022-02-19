@@ -22,7 +22,8 @@ public class DisplayManager {
         DISCONNECTION_FAILED("The program couldn't close the connection between the program and the database."),
         TABLES_CREATION_FAILED("Tables weren't either dropped or/and created."),
         GET_FAILED("The current list of %S wasn't retrieved."),
-        INSERTION_FAILED("The new %s wasn't inserted in the table.");
+        INSERTION_FAILED("The new %s wasn't inserted in the table."),
+        UPDATE_FAILED("The attemp to update %s in the table failed.");
 
         public final String message;
         Message(String message) {

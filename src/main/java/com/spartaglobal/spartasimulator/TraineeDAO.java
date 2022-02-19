@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import static com.spartaglobal.spartasimulator.Main.logger;
 
@@ -123,36 +124,66 @@ public class TraineeDAO {
 
 
     public void insertCentre(TrainingCentre trainingCentre) {
-        String sql = """
-            INSERT INTO training_centres
-            (centre_id, training_centre_type, training_centre_capacity, training_centre_open, months_below_threshold, course)
-            VALUES(?, ?, ?, ?, ?, ?)       
-        """;
-        try{
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, trainingCentre.getTrainingCentreID());
-            preparedStatement.setString(2, trainingCentre.getCentreType());
-            preparedStatement.setInt(3, trainingCentre.getTrainingCentreCapacity());
-            preparedStatement.setBoolean(4, trainingCentre.getIsOpen());
+        long trainingCentreExists = getCentres().stream().filter(c -> c.getTrainingCentreID() == trainingCentre.getTrainingCentreID()).count();
+        String sql = "";
+        if (trainingCentreExists > 0) {
+            sql = """
+                  UPDATE training_centres SET training_centre_open = ?, months_below_threshold = ? WHERE centre_id = ?
+                    """;
+            try {
+                PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                preparedStatement.setBoolean(1, trainingCentre.getIsOpen());
+                preparedStatement.setInt(3, trainingCentre.getTrainingCentreID());
 
-            switch (trainingCentre.getCentreType()){
-                case "TRAININGHUB" ->{
-                    preparedStatement.setInt(5, 0);
-                    preparedStatement.setString(6, null);
+                switch (trainingCentre.getCentreType()){
+                    case "TRAININGHUB" ->{
+                        preparedStatement.setInt(2, 0);
+                    }
+                    case "BOOTCAMP" -> {
+                        preparedStatement.setInt(2, ((BootCamp)trainingCentre).getMonthsBelowThreshold());
+                    }
+                    case "TECHCENTRE" ->{
+                        preparedStatement.setInt(2, 0);
+                    }
                 }
-                case "BOOTCAMP" -> {
-                    preparedStatement.setInt(5, ((BootCamp)trainingCentre).getMonthsBelowThreshold());
-                    preparedStatement.setString(6, null);
-                }
-                case "TECHCENTRE" ->{
-                    preparedStatement.setInt(5, 0);
-                    preparedStatement.setString(6, ((TechCentre)trainingCentre).getCourse());
-                }
+                preparedStatement.executeUpdate();
+            preparedStatement.closeOnCompletion();
+            } catch (SQLException e){
+                DisplayManager.printException(DisplayManager.Message.UPDATE_FAILED, "training centre", e);
             }
 
-            preparedStatement.executeUpdate();
-        }catch (SQLException e){
-            DisplayManager.printException(DisplayManager.Message.INSERTION_FAILED, "training centre", e);
+        } else {
+            sql = """
+            INSERT INTO training_centres
+            (centre_id, training_centre_type, training_centre_capacity, training_centre_open, months_below_threshold, course)
+            VALUES(?, ?, ?, ?, ?, ?)
+        """;
+            try{
+                PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                preparedStatement.setInt(1, trainingCentre.getTrainingCentreID());
+                preparedStatement.setString(2, trainingCentre.getCentreType());
+                preparedStatement.setInt(3, trainingCentre.getTrainingCentreCapacity());
+                preparedStatement.setBoolean(4, trainingCentre.getIsOpen());
+
+                switch (trainingCentre.getCentreType()){
+                    case "TRAININGHUB" ->{
+                        preparedStatement.setInt(5, 0);
+                        preparedStatement.setString(6, null);
+                    }
+                    case "BOOTCAMP" -> {
+                        preparedStatement.setInt(5, ((BootCamp)trainingCentre).getMonthsBelowThreshold());
+                        preparedStatement.setString(6, null);
+                    }
+                    case "TECHCENTRE" ->{
+                        preparedStatement.setInt(5, 0);
+                        preparedStatement.setString(6, ((TechCentre)trainingCentre).getCourse());
+                    }
+                }
+                preparedStatement.executeUpdate();
+            preparedStatement.closeOnCompletion();
+            } catch (SQLException e){
+                DisplayManager.printException(DisplayManager.Message.INSERTION_FAILED, "training centre", e);
+            }
         }
     }
 
@@ -177,7 +208,8 @@ public class TraineeDAO {
                 Client client = new Client(id, state, reqType, reqStartMonth, reqQuantity);
                 clients.add(client);
             }
-
+            rs.close();
+            preparedStatement.closeOnCompletion();
         }catch (SQLException e){
             DisplayManager.printException(DisplayManager.Message.GET_FAILED, "clients", e);
         }
@@ -208,6 +240,8 @@ public class TraineeDAO {
                 Trainee trainee = new Trainee(traineeId, course, centreId, reqId, trainingState, monthsTraining);
                 trainees.add(trainee);
             }
+            rs.close();
+            preparedStatement.closeOnCompletion();
         } catch (SQLException e) {
             DisplayManager.printException(DisplayManager.Message.GET_FAILED, "trainees" , e);
         }
@@ -240,6 +274,8 @@ public class TraineeDAO {
                 }
                 trainingCentres.add(trainingCentre);
             }
+            rs.close();
+            preparedStatement.closeOnCompletion();
         } catch (SQLException e) {
             DisplayManager.printException(DisplayManager.Message.GET_FAILED, "training centres" , e);
         }
@@ -270,6 +306,8 @@ public class TraineeDAO {
                 Requirement requirement = new Requirement(reqId, clientId, reqType, reqStartMonth, reqQuantity, assignedTrainees);
                 requirements.add(requirement);
             }
+            rs.close();
+            preparedStatement.closeOnCompletion();
         } catch (SQLException e) {
             DisplayManager.printException(DisplayManager.Message.GET_FAILED, "requirements" , e);
         }
@@ -298,6 +336,7 @@ public class TraineeDAO {
             preparedStatement.setInt(4, requirement.getClientID());
             preparedStatement.setInt(5, requirement.getAssignedTrainees());
             preparedStatement.executeUpdate();
+            preparedStatement.closeOnCompletion();
         } catch (SQLException e) {
             DisplayManager.printException(DisplayManager.Message.INSERTION_FAILED, "requirement" , e);
         }
@@ -331,6 +370,7 @@ public class TraineeDAO {
             preparedStatement.setInt(8, c.getReqStartMonth());
             preparedStatement.setInt(9, c.getReqQuantity());
             preparedStatement.executeUpdate();
+            preparedStatement.closeOnCompletion();
         } catch (SQLException e) {
             DisplayManager.printException(DisplayManager.Message.INSERTION_FAILED, "client" , e);
         }
@@ -365,6 +405,7 @@ public class TraineeDAO {
             preparedStatement.setString(10, t.getTrainingState());
             preparedStatement.setInt(11, t.getMonthsTraining());
             preparedStatement.executeUpdate();
+            preparedStatement.closeOnCompletion();
         } catch (SQLException e) {
             DisplayManager.printException(DisplayManager.Message.INSERTION_FAILED, "trainee" , e);
         }
