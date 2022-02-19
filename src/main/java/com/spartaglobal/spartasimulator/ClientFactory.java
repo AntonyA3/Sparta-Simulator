@@ -1,5 +1,7 @@
 package com.spartaglobal.spartasimulator;
 
+import static com.spartaglobal.spartasimulator.Main.logger;
+
 import java.util.Random;
 
 public class ClientFactory {
