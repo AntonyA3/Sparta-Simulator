@@ -6,6 +6,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import static com.spartaglobal.spartasimulator.Main.logger;
+
 public class TraineeDAO {
     private Connection connection = null;
     private static int centreId = 0;
@@ -22,19 +24,21 @@ public class TraineeDAO {
                         props.getProperty("dburl"),
                         props.getProperty("dbuserid"),
                         props.getProperty("dbpassword"));
+
             }
 
         } catch (IOException | SQLException e) {
-            e.printStackTrace();
-        }
+            DisplayManager.printException(DisplayManager.Message.CONNECTION_FAILED, e);
+        }logger.info("Database connection open");
     }
 
     public void closeConnection(){
         try {
             this.connection.close();
             this.connection = null;
+            logger.debug("Database connection close");
         } catch (SQLException e) {
-            e.printStackTrace();
+            DisplayManager.printException(DisplayManager.Message.DISCONNECTION_FAILED, e);
         }
     }
 
@@ -49,6 +53,7 @@ public class TraineeDAO {
             statement.executeUpdate("DROP TABLE IF EXISTS training_centres;");
             statement.executeUpdate("DROP TABLE IF EXISTS clients;");
 
+            logger.info("Successfully dropped all tables if exist in the database");
 
             //Create Training Centre Table
             String sql = """
@@ -109,11 +114,10 @@ public class TraineeDAO {
                     );
             """;
             statement.executeUpdate(sql);
-
             statement.close();
-
+            logger.info("Tables created in the database.");
         } catch (SQLException e) {
-            e.printStackTrace();
+            DisplayManager.printException(DisplayManager.Message.TABLES_CREATION_FAILED, e);
         }
     }
 
@@ -148,7 +152,7 @@ public class TraineeDAO {
 
             preparedStatement.executeUpdate();
         }catch (SQLException e){
-
+            DisplayManager.printException(DisplayManager.Message.INSERTION_FAILED, "training centre", e);
         }
     }
 
@@ -175,9 +179,8 @@ public class TraineeDAO {
             }
 
         }catch (SQLException e){
-            e.printStackTrace();
+            DisplayManager.printException(DisplayManager.Message.GET_FAILED, "clients", e);
         }
-
         return clients;
     }
 
@@ -206,7 +209,7 @@ public class TraineeDAO {
                 trainees.add(trainee);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            DisplayManager.printException(DisplayManager.Message.GET_FAILED, "trainees" , e);
         }
         return trainees;
     }
@@ -238,7 +241,7 @@ public class TraineeDAO {
                 trainingCentres.add(trainingCentre);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            DisplayManager.printException(DisplayManager.Message.GET_FAILED, "training centres" , e);
         }
         return trainingCentres;
     }
@@ -268,7 +271,7 @@ public class TraineeDAO {
                 requirements.add(requirement);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            DisplayManager.printException(DisplayManager.Message.GET_FAILED, "requirements" , e);
         }
         return requirements;
     }
@@ -294,9 +297,9 @@ public class TraineeDAO {
             preparedStatement.setInt(3, requirement.getAssignedTrainees());
             preparedStatement.setInt(4, requirement.getClientID());
             preparedStatement.setInt(5, requirement.getAssignedTrainees());
-            int update =preparedStatement.executeUpdate();
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            DisplayManager.printException(DisplayManager.Message.INSERTION_FAILED, "requirement" , e);
         }
 
     }
@@ -329,7 +332,7 @@ public class TraineeDAO {
             preparedStatement.setInt(9, c.getReqQuantity());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            DisplayManager.printException(DisplayManager.Message.INSERTION_FAILED, "client" , e);
         }
     }
 
@@ -363,7 +366,7 @@ public class TraineeDAO {
             preparedStatement.setInt(11, t.getMonthsTraining());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            DisplayManager.printException(DisplayManager.Message.INSERTION_FAILED, "trainee" , e);
         }
     }
 

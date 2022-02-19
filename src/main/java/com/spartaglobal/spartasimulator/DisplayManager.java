@@ -1,13 +1,10 @@
 package com.spartaglobal.spartasimulator;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import java.util.Scanner;
+import static com.spartaglobal.spartasimulator.Main.logger;
 
 
 public class DisplayManager {
-    private static Logger logger = LogManager.getLogger("Display Manager");
-
     public enum Message{
         SIMULATION_START("Simulation starting"),
         MONTHS(String.format("Please, enter the simulation length in months (Min. %d - Max. %d): ", Main.MIN_MONTHS, Main.MAX_MONTHS)),
@@ -19,7 +16,14 @@ public class DisplayManager {
         TRAINEES_TRAINING("-------------------- Number of trainees currently training --------------------"),
         TRAINEES_WAITING("-------------------- Number of trainees on the waiting list --------------------"),
         DATA_CHOICE("Do you want to print the data each month (M) or after completing the simulation (S)?: "),
-        SIMULATION_COMPLETE("Simulation complete");
+        SIMULATION_COMPLETE("Simulation complete"),
+        INPUT_PARSER_FAILED("The program failed parsing the user's input into an Integer."),
+        CONNECTION_FAILED("The program couldn't create a connection between it and the database."),
+        DISCONNECTION_FAILED("The program couldn't close the connection between the program and the database."),
+        TABLES_CREATION_FAILED("Tables weren't either dropped or/and created."),
+        GET_FAILED("The current list of %S wasn't retrieved."),
+        INSERTION_FAILED("The new %s wasn't inserted in the table.");
+
         public final String message;
         Message(String message) {
             this.message = message;
@@ -101,7 +105,11 @@ public class DisplayManager {
         tdao.closeConnection();
     }
 
-    public static void printException(Exception e){
-        logger.error(e);
+    public static void printException(Message m, Exception e){
+        logger.error(m.message + ". " + e);
+    }
+
+    public static void printException(Message m, String type, Exception e){
+        logger.error(String.format(m.message, type) + e);
     }
 }

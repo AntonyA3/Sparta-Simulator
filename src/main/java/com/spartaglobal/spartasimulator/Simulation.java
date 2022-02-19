@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import static com.spartaglobal.spartasimulator.Main.logger;
 
 public class Simulation {
 
@@ -25,11 +27,15 @@ public class Simulation {
         TrainingCentreFactory tcf = new TrainingCentreFactory();
         ClientFactory cf = new ClientFactory();
         RequirementFactory rf = new RequirementFactory();
+        logger.info("Simulation started.");
+        long startSimulationTime = System.nanoTime();
         for(int i = 0; i < months; i++) {
             loop(i, tf, tcf, cf, rf);
-            if(infoGivenMonthly) DisplayManager.printSystemInfo(i);
+            if(infoGivenMonthly) DisplayManager.printSystemInfo(i+1);
         }
         if(!infoGivenMonthly) DisplayManager.printSystemInfo(months);
+        long finishSimulationTime = System.nanoTime();
+        logger.info("Simulation finished. It took " + TimeUnit.NANOSECONDS.toSeconds(finishSimulationTime - startSimulationTime) + " to complete the simulation for a total number of " + months + " cycles.");
     }
 
     /**
