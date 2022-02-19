@@ -140,3 +140,16 @@ We can check the program activity through *logging*. This can help the programme
 
 #### <ins>Project Management: Scrum</ins>
 
+The team was able to track the tasks and requirements assigned to each team member thanks to Trello. These tasks were split into different lists (*Project phases*) and cards (*individual task for each phase*). This way, everyone could know what other members were working on so, they could effectively communicate in the scenario of co-dependent tasks emerged. 
+
+The team scheduled meetings every day at 10:00, 13:45 and 17:00 to keep updated everyone about individual progress. This also helped to share possible problems about the structure of the project or potential failures. Thanks to these meetings, many issues were solved before they escalated.
+
+The *scrum master* made sure that everyone had a task to fulfill and, alongside with the *Trello manager*, they made sure that the trello board was updated in every session.
+
+This is the image of one of the very first stages of the project:
+
+![BeforeTrello](https://user-images.githubusercontent.com/63067669/154815835-e4e568cd-cb7c-45ff-9873-44fe9e116cf1.png)
+
+This image shows all the phases successfully completed at the end of the project:
+
+![AfterTrello](https://user-images.githubusercontent.com/63067669/154815834-4c10f9bd-2671-44f8-b59d-a7cb0b25071a.png)
