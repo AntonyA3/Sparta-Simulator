@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.stream.Stream;
 
 import static com.spartaglobal.spartasimulator.Main.logger;
 

@@ -136,6 +136,10 @@ Tests covered different areas:
 #### <ins>Logging with Log4j:</ins>
 We can check the program activity through *logging*. This can help the programmers to track the steps that the program follows until is completed. Furthermore, this can help to see if there is any potential issue when it's being run.
 
+There are two levels covered:
+* Info - It logs when the program has started or finished.
+* Error - It logs when a SQL haven't been able to be executed.
+
 ![Logger](https://user-images.githubusercontent.com/63067669/154814948-0a7ed7b5-403a-4682-b25b-7db2cb1897d8.png)
 
 #### <ins>Project Management: Scrum</ins>
