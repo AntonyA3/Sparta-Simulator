@@ -330,9 +330,10 @@ public class TraineeDAO {
     }
 
     /***
+     * Inserts the provided trainee into the database, or updates the other fields if the trainee already exists
      * @param t The Trainee to Insert or Update
      *
-     * Inserts the provided trainee into the database, or updates the other fields if the trainee already exists**/
+     * **/
     public void insertTrainee(Trainee t) {
         String sql = """
             INSERT INTO trainees
