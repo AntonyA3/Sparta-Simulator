@@ -9,6 +9,8 @@ import java.util.stream.Stream;
 
 import static com.spartaglobal.spartasimulator.Main.logger;
 
+import static com.spartaglobal.spartasimulator.Main.logger;
+
 public class TraineeDAO {
     private Connection connection = null;
     private static int centreId = 0;
