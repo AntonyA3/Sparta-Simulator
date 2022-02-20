@@ -4,7 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.spartaglobal.spartasimulator.Main.logger;
 
 public class Simulation {
 
@@ -13,37 +17,42 @@ public class Simulation {
     private static final int CENTRE_ATTENDANCE_THRESHOLD = 25;
     private static final int MAX_BOOT_CAMPS = 2;
     private static final double CLIENT_CREATION_CHANCE = 0.5;
-    private static final Random rand = new Random();
 
     /**
      * Carries out the simulation.
      * @param months How many months the simulation should run for.
      * @param infoGivenMonthly Whether the simulation should print information monthly (true) or after the entire simulation (false)
-     * @param tdao The object through which the simulation accesses the database.
      */
-    public static void simulate(int months, boolean infoGivenMonthly, TraineeDAO tdao){
+    public static void simulate(int months, boolean infoGivenMonthly){
         TraineeFactory tf = new TraineeFactory();
         TrainingCentreFactory tcf = new TrainingCentreFactory();
         ClientFactory cf = new ClientFactory();
         RequirementFactory rf = new RequirementFactory();
+        logger.info("Simulation started.");
+        long startSimulationTime = System.nanoTime();
         for(int i = 0; i < months; i++) {
-            loop(i, tdao, tf, tcf, cf, rf);
-            if(infoGivenMonthly) DisplayManager.printSystemInfo(tdao, i);
+            loop(i, tf, tcf, cf, rf);
+            if(infoGivenMonthly) DisplayManager.printSystemInfo(i+1);
         }
-        if(!infoGivenMonthly) DisplayManager.printSystemInfo(tdao, months);
+        if(!infoGivenMonthly) DisplayManager.printSystemInfo(months);
+        long finishSimulationTime = System.nanoTime();
+        logger.info("Simulation finished. It took " + TimeUnit.NANOSECONDS.toSeconds(finishSimulationTime - startSimulationTime) + " seconds to complete the simulation for a total number of " + months + " cycles.");
     }
 
     /**
      * Carries out one loop of the simulation.
      * @param month Which month the simulation is on.
-     * @param tdao The object through which the simulation accesses the database.
      * @param tf Factory object for creating new trainees.
      * @param tcf Factory object for creating new training centres.
      * @param cf Factory object for creating new clients.
      * @param rf Factory object for creating new requirements.
      */
-    private static void loop(int month, TraineeDAO tdao, TraineeFactory tf, TrainingCentreFactory tcf, ClientFactory cf, RequirementFactory rf){
+    private static void loop(int month, TraineeFactory tf, TrainingCentreFactory tcf, ClientFactory cf, RequirementFactory rf){
+        TraineeDAO tdao = new TraineeDAO();
+        tdao.openConnection();
         TrainingCentre newCentre;
+        Stream stream;
+        Random rand = new Random();
         if((month % 2) == 1) {
             do {
                 newCentre = tcf.makeCentre();
@@ -51,6 +60,7 @@ public class Simulation {
             tdao.insertCentre(newCentre);
             if(newCentre.getCentreType().equals("TRAININGHUB")) for(int i = 0; i < 2; i++) tdao.insertCentre(tcf.makeCentre("TRAININGHUB"));
         }
+
 
         // for all happy clients that have been waiting for over a year, create a new requirement
         tdao.getClients().stream()
@@ -62,12 +72,16 @@ public class Simulation {
                     tdao.insertClient(c);
                 });
 
-
-        if((month >= 12) && (rand.nextDouble() < CLIENT_CREATION_CHANCE)) tdao.insertClient(cf.makeClient(month));
+        // make new client and corresponding requirement
+        if((month >= 12) && (rand.nextDouble() < CLIENT_CREATION_CHANCE)) {
+            Client newClient = cf.makeClient(month);
+            tdao.insertClient(newClient);
+            tdao.insertRequirement(rf.makeRequirement(newClient));
+        }
 
         // trainees that have been training for three months become benched
-        tdao.getTrainees().stream()
-                .filter(t -> ((t.getMonthsTraining() >= 3) && (t.getTrainingState().equals("TRAINING"))))
+        tdao.getTrainees("WHERE months_training >= 3 AND training_state = 'TRAINING'").stream()
+                //.filter(t -> ((t.getMonthsTraining() >= 3) && (t.getTrainingState().equals("TRAINING"))))
                 .forEach(t -> {
                     t.setTrainingState("BENCH");
                     tdao.insertTrainee(t);
@@ -75,8 +89,8 @@ public class Simulation {
         // get benched trainees
         // get waiting clients ordered by wait time
         // for each benched trainee, try to assign to a client, with priority to clients earlier in list
-        tdao.getTrainees().stream()
-                .filter(t -> (t.getTrainingState().equals("BENCH")))
+        tdao.getTrainees("WHERE training_state = 'BENCH'").stream()
+                //.filter(t -> (t.getTrainingState().equals("BENCH")))
                 .forEach(t -> assignTraineeToReq(t, tdao));
         // set clients with requirements met to "happy"
         tdao.getClients().stream()
@@ -94,8 +108,8 @@ public class Simulation {
                     unassignTraineesFromReq(c, tdao);
                 });
 
-        tdao.getTrainees().stream()
-                .filter(t -> t.getTrainingState().equals("WAITING"))
+        tdao.getTrainees("WHERE training_state = 'WAITING'").stream()
+                //.filter(t -> t.getTrainingState().equals("WAITING"))
                 .forEach(t -> assignTraineeToCentre(t, tdao));
 
 
@@ -118,14 +132,15 @@ public class Simulation {
                     tdao.insertCentre(c);
                 });
 
-        tdao.getTrainees().stream()
-                .filter(t -> t.getTrainingState().equals("TRAINING"))
+        tdao.getTrainees("WHERE training_state = 'TRAINING'").stream()
+                //.filter(t -> t.getTrainingState().equals("TRAINING"))
                 .filter(t -> inClosedCentre(t, tdao))
                 .forEach(t -> assignTraineeToCentre(t, tdao));
 
-        tdao.getTrainees().stream()
-                .filter(t -> t.getTrainingState().equals("TRAINING"))
+        tdao.getTrainees("WHERE training_state = 'TRAINING'").stream()
+                //.filter(t -> t.getTrainingState().equals("TRAINING"))
                 .forEach(t -> t.incrementMonthsTraining());
+        tdao.closeConnection();
     }
 
     /**
@@ -187,14 +202,14 @@ public class Simulation {
     }
 
     /**
-     * Unassigns all trainees assign to the given client's current requirement.
+     * Unassigns all trainees assigned to the given client's current requirement.
      * @param c The client for which to retrieve the current requirement of.
      * @param tdao The object through which the simulation accesses the database.
      */
     private static void unassignTraineesFromReq(Client c, TraineeDAO tdao) {
         int currentReqID = getCurrentReq(c, tdao).getReqID();
-        tdao.getTrainees().stream()
-                .filter(t -> (t.getReqID() == currentReqID))
+        tdao.getTrainees(String.format("WHERE req_id = %d", currentReqID)).stream()
+                //.filter(t -> (t.getReqID() == currentReqID))
                 .forEach(t -> {
                     t.setReqID(null);
                     tdao.insertTrainee(t);
@@ -234,8 +249,8 @@ public class Simulation {
      * @return Whether the training centre is full (true) or not (false).
      */
     private static boolean isCentreFull(TrainingCentre tc, TraineeDAO tdao) {
-        return (tdao.getTrainees().stream()
-                .filter(t -> t.getCentreID().equals(tc.getTrainingCentreID()))
+        return (tdao.getTrainees(String.format("WHERE centre_id = %d", tc.getTrainingCentreID())).stream()
+                //.filter(t -> t.getCentreID().equals(tc.getTrainingCentreID()))
                 .count() >= tc.getTrainingCentreCapacity()); // should never be greater than
     }
 
@@ -246,8 +261,8 @@ public class Simulation {
      * @return Whether the training centre is low attendance (true) or not (false).
      */
     private static boolean isCentreLowAttendance(TrainingCentre tc, TraineeDAO tdao) {
-        return (tdao.getTrainees().stream()
-                .filter(t -> t.getCentreID().equals(tc.getTrainingCentreID()))
+        return (tdao.getTrainees(String.format("WHERE centre_id = %d", tc.getTrainingCentreID())).stream()
+                //.filter(t -> t.getCentreID().equals(tc.getTrainingCentreID()))
                 .count() < CENTRE_ATTENDANCE_THRESHOLD);
     }
 

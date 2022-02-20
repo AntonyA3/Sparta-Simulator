@@ -1,13 +1,11 @@
 package com.spartaglobal.spartasimulator;
 
-
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.InputMismatchException;
-import java.util.Scanner;
 
 public class Main {
-    public static Logger logger;
+    public static Logger logger = LogManager.getLogger("Sparta-Simulator-Logger");
     public static final int MIN_MONTHS = 1;
     public static final int MAX_MONTHS = 120;
 
@@ -16,10 +14,11 @@ public class Main {
         TraineeDAO tdao = new TraineeDAO();
         tdao.openConnection();
         tdao.createTables();
+        tdao.closeConnection();
         int months = getMonths();
         boolean infoGivenMonthly = getInfoGivenMonthly();
         DisplayManager.printMessage(DisplayManager.Message.SIMULATION_START, months);
-        Simulation.simulate(months, infoGivenMonthly, tdao);
+        Simulation.simulate(months, infoGivenMonthly);
         DisplayManager.printMessage(DisplayManager.Message.SIMULATION_COMPLETE);
     }
 

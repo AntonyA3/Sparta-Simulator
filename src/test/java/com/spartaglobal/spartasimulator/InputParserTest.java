@@ -54,13 +54,13 @@ public class InputParserTest {
     public void givenSetOfStringsWithNoMatching_parseOption_ReturnsNull(){
         String stringTest = inputParser.parseOption("Test", new String[]{"Print", "Months", "Exit"});
         assertNotEquals("Test", stringTest);
-        assertNull(stringTest);
+        assertEquals("INVALID", stringTest);
     }
 
     @Test
     @DisplayName("Given an empty string array, parseOption, should return null")
     public void givenEmptyStringArray_parseOption_ReturnsNull(){
         String stringTest = inputParser.parseOption("Test", new String[]{});
-        assertNull(stringTest);
+        assertEquals("INVALID", stringTest);
     }
 }
