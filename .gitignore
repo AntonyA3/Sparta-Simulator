@@ -1,3 +1,9 @@
+# Ignore IntelliJ Stuff
+*.idea
+*target
+*Sparta-Simulator.iml
+*.iml
+
 # Compiled class file
 *.class
 
@@ -21,3 +27,4 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+*mysql.properties
