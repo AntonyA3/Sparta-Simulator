@@ -18,6 +18,10 @@ public class TraineeDAO {
     public TraineeDAO(){
 
     }
+
+    /**
+     * Opens the connection to the Trainees Database
+     */
     public void openConnection(){
         try {
             if(this.connection == null) {
@@ -35,6 +39,9 @@ public class TraineeDAO {
         }logger.info("Database connection open");
     }
 
+    /**
+     * Closes the connection to the Trainees Database
+     */
     public void closeConnection(){
         try {
             this.connection.close();
@@ -45,6 +52,10 @@ public class TraineeDAO {
         }
     }
 
+    /**
+     * Drops the tables requirements, trainees, training_centres and clients from the database
+     * Then recreates the empty tables in the relational database.
+     */
     public void createTables() {
         Statement statement  = null;
         try {
@@ -124,7 +135,11 @@ public class TraineeDAO {
         }
     }
 
-
+    /***
+     * Inserts the provided training Centre into the database.
+     * @param trainingCentre The Training centre to Insert into the database
+     *
+     * **/
     public void insertCentre(TrainingCentre trainingCentre) {
         long trainingCentreExists = getCentres().stream().filter(c -> c.getTrainingCentreID() == trainingCentre.getTrainingCentreID()).count();
         String sql = "";
@@ -138,14 +153,11 @@ public class TraineeDAO {
                 preparedStatement.setInt(3, trainingCentre.getTrainingCentreID());
 
                 switch (trainingCentre.getCentreType()){
-                    case "TRAININGHUB" ->{
+                    case "TRAININGHUB", "TECHCENTRE" ->{
                         preparedStatement.setInt(2, 0);
                     }
                     case "BOOTCAMP" -> {
                         preparedStatement.setInt(2, ((BootCamp)trainingCentre).getMonthsBelowThreshold());
-                    }
-                    case "TECHCENTRE" ->{
-                        preparedStatement.setInt(2, 0);
                     }
                 }
                 preparedStatement.executeUpdate();
@@ -189,6 +201,10 @@ public class TraineeDAO {
         }
     }
 
+    /**
+     *
+     * @return Array of clients that were retrieved from the database
+     */
     public ArrayList<Client> getClients() {
         ArrayList<Client> clients = new ArrayList<>();
         String sql = """
@@ -218,9 +234,18 @@ public class TraineeDAO {
         return clients;
     }
 
+    /**
+     * This returns all trainees from the relational database
+     * @return all trainees within the trainees table in the database
+     */
     public ArrayList<Trainee> getTrainees() { return getTrainees(""); }
 
 
+    /**
+     *
+     * @param where The Sql string for the where clause.
+     * @return All the trainees from the relational database that satisfies the where clause
+     */
     public ArrayList<Trainee> getTrainees(String where) {
         ArrayList<Trainee> trainees = new ArrayList<>();
         String sql = """
@@ -250,6 +275,10 @@ public class TraineeDAO {
         return trainees;
     }
 
+    /**
+     * This gets all the training centres that currently exist in the database
+     * @return All the training centres inside the relational database
+     */
     public ArrayList<TrainingCentre> getCentres() {
         ArrayList<TrainingCentre> trainingCentres = new ArrayList<>();
 
@@ -284,6 +313,10 @@ public class TraineeDAO {
         return trainingCentres;
     }
 
+    /**
+     * This gets the requirements that are associated with it's client
+     * @return An array of all of the requirments
+     */
     public ArrayList<Requirement> getRequirements() {
 
         ArrayList<Requirement> requirements = new ArrayList<>();
@@ -316,10 +349,11 @@ public class TraineeDAO {
         return requirements;
     }
 
-    /***
+    /**
+     * Inserts the provided requirement into the database, or updates the other fields if the requirement already exists
      * @param requirement The Requirement to Insert or Update
      *
-     * Inserts the provided requirement into the database, or updates the other fields if the requirement already exists**/
+     * **/
     public void insertRequirement(Requirement requirement) {
         String sql = """
             INSERT INTO requirements
@@ -345,10 +379,11 @@ public class TraineeDAO {
 
     }
 
-    /***
+    /**
+     * Inserts the provided client into the database, or updates the other fields if the client already exists
      * @param c The Client to Insert or Update
      *
-     * Inserts the provided client into the database, or updates the other fields if the client already exists**/
+     ***/
     public void insertClient(Client c) {
         String sql = """
                 INSERT INTO clients
@@ -379,9 +414,10 @@ public class TraineeDAO {
     }
 
     /***
+     * Inserts the provided trainee into the database, or updates the other fields if the trainee already exists
      * @param t The Trainee to Insert or Update
      *
-     * Inserts the provided trainee into the database, or updates the other fields if the trainee already exists**/
+     * **/
     public void insertTrainee(Trainee t) {
         String sql = """
             INSERT INTO trainees
@@ -425,6 +461,10 @@ public class TraineeDAO {
         return null;
     }
 
+    /**
+     * Gets the current connection instance to the database
+     * @return The database connection object
+     */
     public Connection getConnection() {
         return this.connection;
     }
