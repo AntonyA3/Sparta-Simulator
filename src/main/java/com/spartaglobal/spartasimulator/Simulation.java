@@ -4,7 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.spartaglobal.spartasimulator.Main.logger;
 
 public class Simulation {
 
@@ -13,7 +17,6 @@ public class Simulation {
     private static final int CENTRE_ATTENDANCE_THRESHOLD = 25;
     private static final int MAX_BOOT_CAMPS = 2;
     private static final double CLIENT_CREATION_CHANCE = 0.5;
-    private static final Random rand = new Random();
 
     /**
      * Carries out the simulation.
@@ -25,11 +28,15 @@ public class Simulation {
         TrainingCentreFactory tcf = new TrainingCentreFactory();
         ClientFactory cf = new ClientFactory();
         RequirementFactory rf = new RequirementFactory();
+        logger.info("Simulation started.");
+        long startSimulationTime = System.nanoTime();
         for(int i = 0; i < months; i++) {
             loop(i, tf, tcf, cf, rf);
-            if(infoGivenMonthly) DisplayManager.printSystemInfo(i);
+            if(infoGivenMonthly) DisplayManager.printSystemInfo(i+1);
         }
         if(!infoGivenMonthly) DisplayManager.printSystemInfo(months);
+        long finishSimulationTime = System.nanoTime();
+        logger.info("Simulation finished. It took " + TimeUnit.NANOSECONDS.toSeconds(finishSimulationTime - startSimulationTime) + " seconds to complete the simulation for a total number of " + months + " cycles.");
     }
 
     /**
@@ -44,6 +51,8 @@ public class Simulation {
         TraineeDAO tdao = new TraineeDAO();
         tdao.openConnection();
         TrainingCentre newCentre;
+        Stream stream;
+        Random rand = new Random();
         if((month % 2) == 1) {
             do {
                 newCentre = tcf.makeCentre();
@@ -51,6 +60,7 @@ public class Simulation {
             tdao.insertCentre(newCentre);
             if(newCentre.getCentreType().equals("TRAININGHUB")) for(int i = 0; i < 2; i++) tdao.insertCentre(tcf.makeCentre("TRAININGHUB"));
         }
+
 
         // for all happy clients that have been waiting for over a year, create a new requirement
         tdao.getClients().stream()

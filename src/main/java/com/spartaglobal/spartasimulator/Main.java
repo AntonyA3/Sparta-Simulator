@@ -1,13 +1,11 @@
 package com.spartaglobal.spartasimulator;
 
-
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.InputMismatchException;
-import java.util.Scanner;
 
 public class Main {
-    public static Logger logger;
+    public static Logger logger = LogManager.getLogger("Sparta-Simulator-Logger");
     public static final int MIN_MONTHS = 1;
     public static final int MAX_MONTHS = 120;
 

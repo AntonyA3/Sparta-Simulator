@@ -1,5 +1,7 @@
 package com.spartaglobal.spartasimulator;
 
+import static com.spartaglobal.spartasimulator.Main.logger;
+
 public class RequirementFactory {
     private int nextID;
     private final int STARTING_ID = 0;
